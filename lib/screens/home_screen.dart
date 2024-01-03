@@ -12,7 +12,11 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class HomeScreenState extends ConsumerState<HomeScreen> {
-  late CameraDescription camera;
+  CameraDescription camera = CameraDescription(
+    lensDirection: CameraLensDirection.back,
+    sensorOrientation: 90,
+    name: "0",
+  );
   late CameraController _controller;
   Future<void>? _initializeControllerFuture;
 
@@ -21,19 +25,17 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     super.initState();
     // To display the current output from the Camera,
     // create a CameraController.
-    WidgetsFlutterBinding.ensureInitialized();
-    availableCameras().then((value) {
-      camera = value.last;
-      _controller = CameraController(
-        // Get a specific camera from the list of available cameras.
-        camera,
-        // Define the resolution to use.
-        ResolutionPreset.high,
-      );
 
-      _initializeControllerFuture = _controller.initialize();
-      // Next, initialize the controller. This returns a Future.
-    });
+    _controller = CameraController(
+      // Get a specific camera from the list of available cameras.
+      camera,
+      // Define the resolution to use.
+      ResolutionPreset.high,
+    );
+
+    _initializeControllerFuture = _controller.initialize();
+    // Next, initialize the controller. This returns a Future.
+
     print("initialize controller value: ${_initializeControllerFuture}");
   }
 
@@ -53,12 +55,20 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
         if (snapshot.connectionState == ConnectionState.done) {
           // If the Future is complete, display the preview.
           return CameraPreview(_controller);
+        } else if (snapshot.hasError) {
+          // Handle any errors that occurred during initialization.
+          return Scaffold(
+            body: Center(
+              child: Text('Error: ${snapshot.error}'),
+            ),
+          );
         } else {
           // Otherwise, display a loading indicator.
           return Scaffold(
-              body: const Center(
-            child: CircularProgressIndicator(),
-          ));
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
         }
       },
     );
