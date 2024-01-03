@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:shaheen_selfie/features/feature_1/screens/home_screen.dart';
+import 'package:shaheen_selfie/screens/home_screen.dart';
 
 final router = GoRouter(
   initialLocation: "/home",
