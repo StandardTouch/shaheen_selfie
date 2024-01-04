@@ -73,7 +73,7 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
                 animation: true,
                 animateFromLastPercent: true,
                 center: Text(
-                  "$loadingPercent%",
+                  "${loadingPercent * 100}%",
                   style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
@@ -84,6 +84,8 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
             )
           : Image.file(
               File(widget.imagePath),
+              width: double.infinity,
+              fit: BoxFit.fitWidth,
             ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: isLoading
