@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shaheen_selfie/utils/config/logger.dart';
 
 final dio = Dio();
@@ -17,7 +18,7 @@ Future<ByteBuffer> makeImageTransparent(String imagePath) async {
       "https://api.remove.bg/v1.0/removebg",
       options: Options(
         headers: {
-          "X-Api-Key": "GmFovjpUGZBvtrk5rnyiZkPy",
+          "X-Api-Key": dotenv.env["REMOVEBG_KEY"],
         },
         responseType: ResponseType.bytes,
       ),
