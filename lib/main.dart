@@ -1,9 +1,8 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shaheen_selfie/utils/config/router_config.dart';
 
-void main() async {
+void main() {
   runApp(
     const ProviderScope(
       child: MyApp(),

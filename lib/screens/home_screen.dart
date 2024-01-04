@@ -1,6 +1,8 @@
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:shaheen_selfie/utils/config/logger.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({
@@ -12,13 +14,8 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class HomeScreenState extends ConsumerState<HomeScreen> {
-  CameraDescription camera = CameraDescription(
-    lensDirection: CameraLensDirection.back,
-    sensorOrientation: 90,
-    name: "0",
-  );
   late CameraController _controller;
-  Future<void>? _initializeControllerFuture;
+  late Future<void> _initializeControllerFuture;
 
   @override
   void initState() {
@@ -28,7 +25,11 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
 
     _controller = CameraController(
       // Get a specific camera from the list of available cameras.
-      camera,
+      const CameraDescription(
+        lensDirection: CameraLensDirection.back,
+        sensorOrientation: 90,
+        name: "0",
+      ),
       // Define the resolution to use.
       ResolutionPreset.high,
     );
@@ -36,7 +37,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     _initializeControllerFuture = _controller.initialize();
     // Next, initialize the controller. This returns a Future.
 
-    print("initialize controller value: ${_initializeControllerFuture}");
+    logger.t("initialize controller value: $_initializeControllerFuture");
   }
 
   @override
@@ -49,12 +50,47 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     // Fill this out in the next steps.
-    return FutureBuilder<void>(
+    return FutureBuilder(
       future: _initializeControllerFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           // If the Future is complete, display the preview.
-          return CameraPreview(_controller);
+          return Scaffold(
+            backgroundColor: Colors.transparent,
+            body: CameraPreview(_controller),
+            floatingActionButtonLocation:
+                FloatingActionButtonLocation.centerFloat,
+            floatingActionButton: FloatingActionButton.large(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(100)),
+              onPressed: () async {
+                try {
+                  // Ensure that the camera is initialized.
+                  await _initializeControllerFuture;
+
+                  // Attempt to take a picture and then get the location
+                  // where the image file is saved.
+                  final image = await _controller.takePicture();
+                  if (!context.mounted) return;
+                  context.pushNamed("preview", pathParameters: {
+                    "imagePath": image.path,
+                  });
+                } catch (e) {
+                  // If an error occurs, log the error to the console.
+                  logger.e(e);
+                }
+              },
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                margin: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.red,
+                ),
+              ),
+            ),
+          );
         } else if (snapshot.hasError) {
           // Handle any errors that occurred during initialization.
           return Scaffold(
@@ -62,11 +98,19 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
               child: Text('Error: ${snapshot.error}'),
             ),
           );
-        } else {
+        } else if (snapshot.connectionState == ConnectionState.waiting) {
           // Otherwise, display a loading indicator.
-          return Scaffold(
+          return const Scaffold(
             body: Center(
               child: CircularProgressIndicator(),
+            ),
+          );
+        } else {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                color: Colors.red,
+              ),
             ),
           );
         }
