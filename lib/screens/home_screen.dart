@@ -47,6 +47,24 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     super.dispose();
   }
 
+  void takePicture() async {
+    try {
+      // Ensure that the camera is initialized.
+      await _initializeControllerFuture;
+
+      // Attempt to take a picture and then get the location
+      // where the image file is saved.
+      final image = await _controller.takePicture();
+      if (!context.mounted) return;
+      context.pushNamed("preview", pathParameters: {
+        "imagePath": image.path,
+      });
+    } catch (e) {
+      // If an error occurs, log the error to the console.
+      logger.e(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Fill this out in the next steps.
@@ -60,26 +78,10 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
             body: CameraPreview(_controller),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
-            floatingActionButton: FloatingActionButton.large(
+            floatingActionButton: FloatingActionButton(
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(100)),
-              onPressed: () async {
-                try {
-                  // Ensure that the camera is initialized.
-                  await _initializeControllerFuture;
-
-                  // Attempt to take a picture and then get the location
-                  // where the image file is saved.
-                  final image = await _controller.takePicture();
-                  if (!context.mounted) return;
-                  context.pushNamed("preview", pathParameters: {
-                    "imagePath": image.path,
-                  });
-                } catch (e) {
-                  // If an error occurs, log the error to the console.
-                  logger.e(e);
-                }
-              },
+              onPressed: takePicture,
               child: Container(
                 width: double.infinity,
                 height: double.infinity,
