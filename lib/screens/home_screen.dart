@@ -75,7 +75,10 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
           // If the Future is complete, display the preview.
           return Scaffold(
             backgroundColor: Colors.transparent,
-            body: CameraPreview(_controller),
+            body: SizedBox(
+              width: double.infinity,
+              child: CameraPreview(_controller),
+            ),
             floatingActionButtonLocation:
                 FloatingActionButtonLocation.centerFloat,
             floatingActionButton: FloatingActionButton(

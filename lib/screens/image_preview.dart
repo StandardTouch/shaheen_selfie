@@ -55,10 +55,22 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
       appBar: AppBar(
         backgroundColor: const Color(0xff002147),
         foregroundColor: Colors.white,
-        title: Image.asset(
-          "assets/logo.png",
-          fit: BoxFit.contain,
-          width: 100,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Image.asset(
+              "assets/logo.png",
+              fit: BoxFit.contain,
+              width: 100,
+            ),
+            Text(
+              "Powered By Standard Touch",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall!
+                  .copyWith(color: Colors.white),
+            )
+          ],
         ),
         toolbarHeight: 100,
         centerTitle: true,

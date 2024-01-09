@@ -45,6 +45,8 @@ dependencies:
   top_snackbar_flutter: ^3.1.0
   percent_indicator: ^4.2.3
   flutter_dotenv: ^5.1.0
+  flutter_native_splash: ^2.3.9
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
