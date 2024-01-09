@@ -64,7 +64,7 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
               width: 100,
             ),
             Text(
-              "Powered By Standard Touch",
+              "Powered By StandardTouch",
               style: Theme.of(context)
                   .textTheme
                   .bodySmall!
