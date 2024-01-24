@@ -86,7 +86,7 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
                 animateFromLastPercent: true,
                 center: Text(
                   "${loadingPercent * 100}%",
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
