@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:shaheen_selfie/services/bg_remove_service.dart';
 import 'package:shaheen_selfie/utils/config/logger.dart';
+import 'package:shaheen_selfie/utils/services/background_remove.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
@@ -26,7 +27,8 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
           loadingPercent = 0.8;
         },
       );
-      final image = await makeImageTransparent(widget.imagePath);
+      // final image = await makeImageTransparent(widget.imagePath);
+      final image = await removeGreenShades(widget.imagePath);
 
       if (!context.mounted) return;
       context.pushNamed(
