@@ -30,9 +30,13 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
         sensorOrientation: 90,
         name: "0",
       ),
+
       // Define the resolution to use.
       ResolutionPreset.high,
+      enableAudio: false,
     );
+
+    _controller.setFlashMode(FlashMode.off);
 
     _initializeControllerFuture = _controller.initialize();
     // Next, initialize the controller. This returns a Future.

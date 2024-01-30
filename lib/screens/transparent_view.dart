@@ -70,7 +70,7 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
               right: 0,
               child: Image.memory(
                 uint8list,
-                height: 300,
+                height: 500,
               ),
             ),
           ],

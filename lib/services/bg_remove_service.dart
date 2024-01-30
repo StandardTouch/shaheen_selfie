@@ -8,17 +8,16 @@ final dio = Dio();
 
 Future<ByteBuffer> makeImageTransparent(String imagePath) async {
   FormData formData = FormData.fromMap({
-    "size": "auto",
     "image_file":
         await MultipartFile.fromFile(imagePath, filename: "upload.jpg"),
   });
   logger.i(imagePath);
   try {
     final response = await dio.post(
-      "https://api.remove.bg/v1.0/removebg",
+      "http://dev.shaheengroup.org/background/removebg",
       options: Options(
         headers: {
-          "X-Api-Key": dotenv.env["REMOVEBG_KEY"],
+          "Authorization": dotenv.env["REMBG_KEY"],
         },
         responseType: ResponseType.bytes,
       ),
@@ -28,7 +27,7 @@ Future<ByteBuffer> makeImageTransparent(String imagePath) async {
     return response.data.buffer;
   } catch (err) {
     if (err is DioException) {
-      logger.e("Error from makeImageTransparent: ${err.response}");
+      logger.e("Error from makeImageTransparent: ${err}");
       throw DioException(requestOptions: err.requestOptions);
     } else {
       logger.e("Error from makeImageTransparent string: $err");

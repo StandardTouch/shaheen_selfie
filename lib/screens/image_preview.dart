@@ -27,8 +27,8 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
           loadingPercent = 0.8;
         },
       );
-      // final image = await makeImageTransparent(widget.imagePath);
-      final image = await removeGreenShades(widget.imagePath);
+      final image = await makeImageTransparent(widget.imagePath);
+      // final image = await removeGreenShades(widget.imagePath);
 
       if (!context.mounted) return;
       context.pushNamed(
