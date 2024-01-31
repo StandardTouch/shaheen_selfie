@@ -3,10 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:loading_indicator/loading_indicator.dart';
 import 'package:shaheen_selfie/services/bg_remove_service.dart';
 import 'package:shaheen_selfie/utils/config/logger.dart';
-import 'package:shaheen_selfie/utils/services/background_remove.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
@@ -24,7 +23,6 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
       setState(
         () {
           isLoading = true;
-          loadingPercent = 0.8;
         },
       );
       final image = await makeImageTransparent(widget.imagePath);
@@ -43,14 +41,13 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
       logger.e("From image preview screen: $err");
     } finally {
       setState(() {
-        loadingPercent = 1;
         isLoading = false;
       });
     }
   }
 
   bool isLoading = false;
-  double loadingPercent = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,22 +75,29 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
         centerTitle: true,
       ),
       body: isLoading
-          ? Center(
-              child: LinearPercentIndicator(
-                addAutomaticKeepAlive: true,
-                progressColor: Colors.green[900],
-                percent: loadingPercent,
-                lineHeight: 20,
-                animation: true,
-                animateFromLastPercent: true,
-                center: Text(
-                  "${loadingPercent * 100}%",
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+          ? const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 100,
+                    child: LoadingIndicator(
+                      indicatorType: Indicator.ballPulse,
+                      colors: [Colors.red, Color(0xff002147), Colors.yellow],
+                    ),
                   ),
-                ),
-                animationDuration: 1000,
+                  Text(
+                    "Working magic on your image... 🪄 ",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                  Text(
+                    "Please hold on a moment!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  )
+                ],
               ),
             )
           : Image.file(

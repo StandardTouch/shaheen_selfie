@@ -27,7 +27,7 @@ Future<ByteBuffer> makeImageTransparent(String imagePath) async {
     return response.data.buffer;
   } catch (err) {
     if (err is DioException) {
-      logger.e("Error from makeImageTransparent: ${err}");
+      logger.e("Error from makeImageTransparent: $err");
       throw DioException(requestOptions: err.requestOptions);
     } else {
       logger.e("Error from makeImageTransparent string: $err");

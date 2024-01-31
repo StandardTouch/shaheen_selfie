@@ -45,11 +45,8 @@ class APIService {
         queryParameters: {"expiration": 600, "key": dotenv.env["IMG_BB_KEY"]},
         data: formData,
       );
-      if (response.statusCode == HttpStatus.ok) {
-        return response.data["data"]["display_url"];
-      } else {
-        throw DioException(requestOptions: response.requestOptions);
-      }
+
+      return response.data["data"]["display_url"];
     } on DioException catch (err) {
       logger.e("Error from hostImage: ${err.response?.data}", error: err);
       throw DioException(requestOptions: err.requestOptions);

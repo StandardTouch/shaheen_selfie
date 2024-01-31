@@ -1,9 +1,8 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
@@ -11,9 +10,10 @@ import 'package:shaheen_selfie/utils/config/logger.dart';
 import 'package:shaheen_selfie/utils/services/api_service.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import 'package:widgets_to_image/widgets_to_image.dart';
 
 final formKey = GlobalKey<FormState>();
-GlobalKey stackKey = GlobalKey();
+// GlobalKey stackKey = GlobalKey();
 
 class TransparentView extends ConsumerStatefulWidget {
   const TransparentView({super.key, required this.imageData});
@@ -25,6 +25,13 @@ class TransparentView extends ConsumerStatefulWidget {
 }
 
 class _TransparentViewState extends ConsumerState<TransparentView> {
+  late Rect rect = Rect.fromCenter(
+    center: MediaQuery.of(context).size.center(Offset.zero),
+    width: 300,
+    height: MediaQuery.of(context).size.width,
+  );
+  bool isCapturing = false;
+  WidgetsToImageController widgetController = WidgetsToImageController();
   @override
   Widget build(BuildContext context) {
     Uint8List uint8list = Uint8List.view(widget.imageData);
@@ -52,37 +59,66 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
         toolbarHeight: 100,
         centerTitle: true,
       ),
-      body: RepaintBoundary(
-        key: stackKey,
-        child: Stack(
-          children: [
-            SizedBox(
-              width: double.infinity,
-              height: double.infinity,
-              child: Image.asset(
-                "assets/bg.png",
-                fit: BoxFit.cover,
-              ),
+      body: Center(
+        child: WidgetsToImage(
+          controller: widgetController,
+          child: Container(
+            margin: const EdgeInsets.all(10),
+            height: MediaQuery.of(context).size.width,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+                border: Border.all(
+                  color: const Color(0xff002147),
+                  width: 10,
+                ),
+                borderRadius: BorderRadius.circular(10)),
+            child: Stack(
+              children: [
+                Container(
+                  decoration: const BoxDecoration(
+                      image: DecorationImage(
+                    image: AssetImage("assets/bg.png"),
+                    fit: BoxFit.cover,
+                  )),
+                ),
+                TransformableBox(
+                  cornerHandleBuilder: (ctx, handle) => isCapturing
+                      ? const SizedBox.shrink()
+                      : DefaultCornerHandle(handle: handle),
+                  sideHandleBuilder: (xtx, handle) => isCapturing
+                      ? const SizedBox.shrink()
+                      : DefaultSideHandle(handle: handle),
+                  rect: rect,
+                  clampingRect: Offset.zero & MediaQuery.sizeOf(context),
+                  onChanged: (result, event) {
+                    setState(() {
+                      rect = result.rect;
+                    });
+                  },
+                  contentBuilder: (ctx, rect, flip) => Image.memory(
+                    uint8list,
+                    height: 500,
+                  ),
+                ),
+              ],
             ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: Image.memory(
-                uint8list,
-                height: 500,
-              ),
-            ),
-          ],
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: ElevatedButton(
         onPressed: () {
+          setState(() {
+            isCapturing = true;
+          });
           showDialog(
               barrierDismissible: false,
               context: context,
-              builder: (ctx) => const ShaheenAlertDialog());
+              builder: (ctx) {
+                return ShaheenAlertDialog(
+                  widgetController: widgetController,
+                );
+              });
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xff002147),
@@ -97,8 +133,10 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
   }
 }
 
+// ignore: must_be_immutable
 class ShaheenAlertDialog extends ConsumerStatefulWidget {
-  const ShaheenAlertDialog({super.key});
+  ShaheenAlertDialog({super.key, required this.widgetController});
+  WidgetsToImageController widgetController;
 
   @override
   ConsumerState<ShaheenAlertDialog> createState() => _ShaheenAlertDialogState();
@@ -116,12 +154,15 @@ class _ShaheenAlertDialogState extends ConsumerState<ShaheenAlertDialog> {
       // capture image
       final imageBytes = await capturePng();
       // get imageFile
-      if (imageBytes != null) {
-        final imageFile = await convertToImageFile(imageBytes);
-        if (imageFile != null) {
-          // host image
+
+      final imageFile = await convertToImageFile(imageBytes);
+
+      if (imageFile != null) {
+        try {
+// host image
           final imageUrl = await APIService.hostImage(imageFile);
           logger.i("ImageUrl: $imageUrl");
+          // send message on whatsapp
           final isSent = await APIService.sendWhatsappMessage(
             mobileNo: phoneNumber,
             imageUrl: imageUrl,
@@ -139,8 +180,15 @@ class _ShaheenAlertDialogState extends ConsumerState<ShaheenAlertDialog> {
               const CustomSnackBar.error(message: "An Error Occurred"),
             );
           }
+        } catch (err) {
+          logger.e(err);
+        } finally {
+          setState(() {
+            isLoading = false;
+          });
         }
       }
+
       if (!context.mounted) return;
       context.pop();
       context.go("/home");
@@ -150,19 +198,9 @@ class _ShaheenAlertDialogState extends ConsumerState<ShaheenAlertDialog> {
     }
   }
 
-  Future<Uint8List?> capturePng() async {
-    try {
-      RenderRepaintBoundary boundary =
-          stackKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
-      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      ByteData? byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
-      Uint8List pngBytes = byteData!.buffer.asUint8List();
-      return pngBytes;
-    } catch (e) {
-      logger.e("error from capturePng", error: e);
-      return null;
-    }
+  Future<Uint8List> capturePng() async {
+    final bytes = await widget.widgetController.capture();
+    return bytes!;
   }
 
   Future<File?> convertToImageFile(Uint8List pngBytes) async {
