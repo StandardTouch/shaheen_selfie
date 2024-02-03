@@ -1,6 +1,6 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,11 +25,8 @@ class TransparentView extends ConsumerStatefulWidget {
 }
 
 class _TransparentViewState extends ConsumerState<TransparentView> {
-  late Rect rect = Rect.fromCenter(
-    center: MediaQuery.of(context).size.center(Offset.zero),
-    width: 300,
-    height: MediaQuery.of(context).size.width,
-  );
+  late Rect rect;
+
   bool isCapturing = false;
   WidgetsToImageController widgetController = WidgetsToImageController();
   @override
@@ -60,49 +57,66 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
         centerTitle: true,
       ),
       body: Center(
-        child: WidgetsToImage(
-          controller: widgetController,
-          child: Container(
-            margin: const EdgeInsets.all(10),
-            height: MediaQuery.of(context).size.width,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color(0xff002147),
-                  width: 10,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final center = Offset(
+                constraints.maxWidth / 3, (constraints.maxHeight - 100) / 3);
+            final double width = min(
+                300,
+                constraints.maxWidth *
+                    0.8); // Example width, max 80% of parent width
+            final height = width;
+            // Keep it square or adjust as per your requirement
+            rect = Rect.fromCenter(
+              center: center,
+              width: width,
+              height: height,
+            );
+            return WidgetsToImage(
+              controller: widgetController,
+              child: Container(
+                margin: const EdgeInsets.all(10),
+                height: MediaQuery.of(context).size.width,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xff002147),
+                      width: 10,
+                    ),
+                    borderRadius: BorderRadius.circular(10)),
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: const BoxDecoration(
+                          image: DecorationImage(
+                        image: AssetImage("assets/bg.png"),
+                        fit: BoxFit.cover,
+                      )),
+                    ),
+                    TransformableBox(
+                      cornerHandleBuilder: (ctx, handle) => isCapturing
+                          ? const SizedBox.shrink()
+                          : DefaultCornerHandle(handle: handle),
+                      sideHandleBuilder: (xtx, handle) => isCapturing
+                          ? const SizedBox.shrink()
+                          : DefaultSideHandle(handle: handle),
+                      rect: rect,
+                      clampingRect: Offset.zero & MediaQuery.sizeOf(context),
+                      onChanged: (result, event) {
+                        setState(() {
+                          rect = result.rect;
+                        });
+                      },
+                      contentBuilder: (ctx, rect, flip) => Image.memory(
+                        uint8list,
+                        height: 500,
+                      ),
+                    ),
+                  ],
                 ),
-                borderRadius: BorderRadius.circular(10)),
-            child: Stack(
-              children: [
-                Container(
-                  decoration: const BoxDecoration(
-                      image: DecorationImage(
-                    image: AssetImage("assets/bg.png"),
-                    fit: BoxFit.cover,
-                  )),
-                ),
-                TransformableBox(
-                  cornerHandleBuilder: (ctx, handle) => isCapturing
-                      ? const SizedBox.shrink()
-                      : DefaultCornerHandle(handle: handle),
-                  sideHandleBuilder: (xtx, handle) => isCapturing
-                      ? const SizedBox.shrink()
-                      : DefaultSideHandle(handle: handle),
-                  rect: rect,
-                  clampingRect: Offset.zero & MediaQuery.sizeOf(context),
-                  onChanged: (result, event) {
-                    setState(() {
-                      rect = result.rect;
-                    });
-                  },
-                  contentBuilder: (ctx, rect, flip) => Image.memory(
-                    uint8list,
-                    height: 500,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
