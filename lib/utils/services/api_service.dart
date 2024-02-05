@@ -33,6 +33,7 @@ String generateUniqueString() {
 
 class APIService {
   static Future<String> hostImage(File image) async {
+    final imgBBKey = dotenv.env["IMG_BB_KEY"];
     var formData = FormData.fromMap({
       "image": await MultipartFile.fromFile(
         image.path,
@@ -41,14 +42,15 @@ class APIService {
     });
     try {
       final response = await dio.post(
-        Constants.imgbbUrl,
-        queryParameters: {"expiration": 600, "key": dotenv.env["IMG_BB_KEY"]},
-        data: formData,
-      );
+          "${Constants.imgbbUrl}?expiration=600&key=$imgBBKey",
+          // queryParameters: {"expiration": 600, "key": dotenv.env["IMG_BB_KEY"]},
+          data: formData,
+          options: Options(contentType: "multipart/form-data"));
 
       return response.data["data"]["display_url"];
     } on DioException catch (err) {
-      logger.e("Error from hostImage: ${err.response?.data}", error: err);
+      logger.e("Error from hostImage: ${err.response?.headers.map}",
+          error: err);
       throw DioException(requestOptions: err.requestOptions);
     }
   }

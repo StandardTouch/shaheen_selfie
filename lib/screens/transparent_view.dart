@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
+import 'package:cloudinary_sdk/cloudinary_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
 import 'package:shaheen_selfie/utils/config/logger.dart';
 import 'package:shaheen_selfie/utils/services/api_service.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
@@ -25,10 +28,33 @@ class TransparentView extends ConsumerStatefulWidget {
 }
 
 class _TransparentViewState extends ConsumerState<TransparentView> {
-  late Rect rect;
-
   bool isCapturing = false;
-  WidgetsToImageController widgetController = WidgetsToImageController();
+  late ScreenshotController screenshotController;
+  late Rect rect;
+  late Offset center = Offset(150, 150);
+  double width = 100; // Example width, max 80% of parent width
+  double height = 100;
+
+  String generateUniqueString() {
+    // Create a random number generator
+    final Random random = Random();
+    String randomString =
+        List.generate(10, (_) => random.nextInt(256).toRadixString(16)).join();
+    String timestamp = DateFormat('yyyyMMddHHmmssSSS').format(DateTime.now());
+    return '$timestamp-$randomString';
+  }
+
+  @override
+  void initState() {
+    screenshotController = ScreenshotController();
+    rect = Rect.fromCenter(
+      center: center,
+      width: width,
+      height: height,
+    );
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     Uint8List uint8list = Uint8List.view(widget.imageData);
@@ -57,24 +83,13 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
         centerTitle: true,
       ),
       body: Center(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final center = Offset(
-                constraints.maxWidth / 3, (constraints.maxHeight - 100) / 3);
-            final double width = min(
-                300,
-                constraints.maxWidth *
-                    0.8); // Example width, max 80% of parent width
-            final height = width;
-            // Keep it square or adjust as per your requirement
-            rect = Rect.fromCenter(
-              center: center,
-              width: width,
-              height: height,
-            );
-            return WidgetsToImage(
-              controller: widgetController,
-              child: Container(
+        child: Screenshot(
+          controller: screenshotController,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Keep it square or adjust as per your requirement
+
+              return Container(
                 margin: const EdgeInsets.all(10),
                 height: MediaQuery.of(context).size.width,
                 width: MediaQuery.of(context).size.width,
@@ -84,39 +99,103 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                       width: 10,
                     ),
                     borderRadius: BorderRadius.circular(10)),
-                child: Stack(
+                child: Column(
                   children: [
                     Container(
-                      decoration: const BoxDecoration(
-                          image: DecorationImage(
-                        image: AssetImage("assets/bg.png"),
-                        fit: BoxFit.cover,
-                      )),
+                      height: MediaQuery.of(context).size.width / 6,
+                      color: const Color(0xff002147),
+                      width: double.infinity,
+                      child: Image.asset("assets/logo.png"),
                     ),
-                    TransformableBox(
-                      cornerHandleBuilder: (ctx, handle) => isCapturing
-                          ? const SizedBox.shrink()
-                          : DefaultCornerHandle(handle: handle),
-                      sideHandleBuilder: (xtx, handle) => isCapturing
-                          ? const SizedBox.shrink()
-                          : DefaultSideHandle(handle: handle),
-                      rect: rect,
-                      clampingRect: Offset.zero & MediaQuery.sizeOf(context),
-                      onChanged: (result, event) {
-                        setState(() {
-                          rect = result.rect;
-                        });
-                      },
-                      contentBuilder: (ctx, rect, flip) => Image.memory(
-                        uint8list,
-                        height: 500,
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              image: const DecorationImage(
+                                image: AssetImage("assets/bg.jpg"),
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                alignment: Alignment.bottomRight,
+                                height: MediaQuery.of(context).size.width / 15,
+                                color: const Color(0xff002147),
+                                child: const Row(
+                                  children: [
+                                    Expanded(
+                                        flex: 3,
+                                        child: FittedBox(
+                                          child: Text(
+                                            "Toll Free No: 18001216235",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        )),
+                                    const SizedBox(
+                                      width: 20,
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: FittedBox(
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.public,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              "shaheengroup.org",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
+                          TransformableBox(
+                            visibleHandles: isCapturing
+                                ? {}
+                                : {
+                                    HandlePosition.left,
+                                    HandlePosition.right,
+                                    HandlePosition.top,
+                                    HandlePosition.bottom,
+                                    HandlePosition.topLeft,
+                                    HandlePosition.bottomRight,
+                                    HandlePosition.topRight,
+                                    HandlePosition.bottomLeft
+                                  },
+                            rect: rect,
+                            clampingRect:
+                                Offset.zero & MediaQuery.sizeOf(context),
+                            onChanged: (result, event) {
+                              setState(() {
+                                rect = result.rect;
+                              });
+                            },
+                            contentBuilder: (ctx, rect, flip) => Image.memory(
+                              uint8list,
+                              height: 500,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -130,7 +209,7 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
               context: context,
               builder: (ctx) {
                 return ShaheenAlertDialog(
-                  widgetController: widgetController,
+                  widgetController: screenshotController,
                 );
               });
         },
@@ -150,8 +229,7 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
 // ignore: must_be_immutable
 class ShaheenAlertDialog extends ConsumerStatefulWidget {
   ShaheenAlertDialog({super.key, required this.widgetController});
-  WidgetsToImageController widgetController;
-
+  ScreenshotController widgetController;
   @override
   ConsumerState<ShaheenAlertDialog> createState() => _ShaheenAlertDialogState();
 }
@@ -160,6 +238,12 @@ class _ShaheenAlertDialogState extends ConsumerState<ShaheenAlertDialog> {
   bool isLoading = false;
   String phoneNumber = "";
   void sharePicture() async {
+    final cloudinary = Cloudinary.full(
+      apiKey: "581365824184465",
+      apiSecret: "48xWnkK1rABkTo-9cUCOJaI0fs0",
+      cloudName: "djgpfijtr",
+    );
+
     if (formKey.currentState!.validate()) {
       formKey.currentState!.save();
       setState(() {
@@ -174,12 +258,21 @@ class _ShaheenAlertDialogState extends ConsumerState<ShaheenAlertDialog> {
       if (imageFile != null) {
         try {
 // host image
-          final imageUrl = await APIService.hostImage(imageFile);
+          // final imageUrl = await APIService.hostImage(imageFile);
+          final uploadResponse =
+              await cloudinary.uploadResource(CloudinaryUploadResource(
+            filePath: imageFile.path,
+            fileBytes: imageFile.readAsBytesSync(),
+            resourceType: CloudinaryResourceType.image,
+            folder: "shaheen_students",
+            fileName: generateUniqueString(),
+          ));
+          final imageUrl = uploadResponse.secureUrl;
           logger.i("ImageUrl: $imageUrl");
           // send message on whatsapp
           final isSent = await APIService.sendWhatsappMessage(
             mobileNo: phoneNumber,
-            imageUrl: imageUrl,
+            imageUrl: imageUrl!,
           );
           if (isSent) {
             if (!context.mounted) return;
@@ -195,7 +288,10 @@ class _ShaheenAlertDialogState extends ConsumerState<ShaheenAlertDialog> {
             );
           }
         } catch (err) {
-          logger.e(err);
+          showTopSnackBar(
+            Overlay.of(context),
+            const CustomSnackBar.error(message: "An Error Occurred"),
+          );
         } finally {
           setState(() {
             isLoading = false;
@@ -267,7 +363,7 @@ class _ShaheenAlertDialogState extends ConsumerState<ShaheenAlertDialog> {
           )),
       actions: [
         ElevatedButton(
-          onPressed: (isLoading)
+          onPressed: isLoading
               ? null
               : () {
                   context.pop();
