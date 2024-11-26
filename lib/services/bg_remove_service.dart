@@ -14,10 +14,10 @@ Future<ByteBuffer> makeImageTransparent(String imagePath) async {
   logger.i(imagePath);
   try {
     final response = await dio.post(
-      "http://dev.shaheengroup.org/background/removebg",
+      "https://api.remove.bg/v1.0/removebg",
       options: Options(
         headers: {
-          "Authorization": dotenv.env["REMBG_KEY"],
+          "X-Api-Key": dotenv.env["REMOVEBG_KEY"],
         },
         responseType: ResponseType.bytes,
       ),

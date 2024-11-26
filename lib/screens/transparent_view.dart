@@ -13,7 +13,6 @@ import 'package:shaheen_selfie/utils/config/logger.dart';
 import 'package:shaheen_selfie/utils/services/api_service.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import 'package:widgets_to_image/widgets_to_image.dart';
 
 final formKey = GlobalKey<FormState>();
 // GlobalKey stackKey = GlobalKey();
@@ -31,7 +30,8 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
   bool isCapturing = false;
   late ScreenshotController screenshotController;
   late Rect rect;
-  late Offset center = Offset(150, 150);
+  double rotationAngle = 0.0; // State variable for rotation angle
+  late Offset center = const Offset(150, 150);
   double width = 100; // Example width, max 80% of parent width
   double height = 100;
 
@@ -58,6 +58,7 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
   @override
   Widget build(BuildContext context) {
     Uint8List uint8list = Uint8List.view(widget.imageData);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xff002147),
@@ -93,75 +94,75 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                 margin: const EdgeInsets.all(10),
                 height: MediaQuery.of(context).size.width,
                 width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color(0xff002147),
-                      width: 10,
-                    ),
-                    borderRadius: BorderRadius.circular(10)),
+                // decoration: BoxDecoration(
+                //     border: Border.all(
+                //       color: const Color(0xff002147),
+                //       width: 10,
+                //     ),
+                //     borderRadius: BorderRadius.circular(10)),
                 child: Column(
                   children: [
-                    Container(
-                      height: MediaQuery.of(context).size.width / 6,
-                      color: const Color(0xff002147),
-                      width: double.infinity,
-                      child: Image.asset("assets/logo.png"),
-                    ),
+                    // Container(
+                    //   height: MediaQuery.of(context).size.width / 6,
+                    //   color: const Color(0xff002147),
+                    //   width: double.infinity,
+                    //   child: Image.asset("assets/logo.png"),
+                    // ),
                     Expanded(
                       child: Stack(
                         children: [
                           Container(
-                            decoration: BoxDecoration(
-                              image: const DecorationImage(
+                            decoration: const BoxDecoration(
+                              image: DecorationImage(
                                 image: AssetImage("assets/bg.jpg"),
                                 fit: BoxFit.cover,
                               ),
                             ),
                           ),
-                          Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                alignment: Alignment.bottomRight,
-                                height: MediaQuery.of(context).size.width / 15,
-                                color: const Color(0xff002147),
-                                child: const Row(
-                                  children: [
-                                    Expanded(
-                                        flex: 3,
-                                        child: FittedBox(
-                                          child: Text(
-                                            "Toll Free No: 18001216235",
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                            ),
-                                          ),
-                                        )),
-                                    const SizedBox(
-                                      width: 20,
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: FittedBox(
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.public,
-                                              color: Colors.white,
-                                            ),
-                                            Text(
-                                              "shaheengroup.org",
-                                              style: TextStyle(
-                                                  color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )),
+                          // Positioned(
+                          //     bottom: 0,
+                          //     left: 0,
+                          //     right: 0,
+                          //     child: Container(
+                          //       alignment: Alignment.bottomRight,
+                          //       height: MediaQuery.of(context).size.width / 15,
+                          //       color: const Color(0xff002147),
+                          //       child: const Row(
+                          //         children: [
+                          //           Expanded(
+                          //               flex: 3,
+                          //               child: FittedBox(
+                          //                 child: Text(
+                          //                   "Toll Free No: 18001216235",
+                          //                   style: TextStyle(
+                          //                     color: Colors.white,
+                          //                   ),
+                          //                 ),
+                          //               )),
+                          //           SizedBox(
+                          //             width: 20,
+                          //           ),
+                          //           Expanded(
+                          //             flex: 2,
+                          //             child: FittedBox(
+                          //               child: Row(
+                          //                 children: [
+                          //                   Icon(
+                          //                     Icons.public,
+                          //                     color: Colors.white,
+                          //                   ),
+                          //                   Text(
+                          //                     "shaheengroup.org",
+                          //                     style: TextStyle(
+                          //                         color: Colors.white),
+                          //                   ),
+                          //                 ],
+                          //               ),
+                          //             ),
+                          //           ),
+                          //         ],
+                          //       ),
+                          //     )),
                           TransformableBox(
                             visibleHandles: isCapturing
                                 ? {}
@@ -183,11 +184,45 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                                 rect = result.rect;
                               });
                             },
-                            contentBuilder: (ctx, rect, flip) => Image.memory(
-                              uint8list,
-                              height: 500,
+                            // Apply rotation using Transform widget
+                            contentBuilder: (ctx, rect, flip) =>
+                                Transform.rotate(
+                              angle: rotationAngle, // Apply the rotation
+                              child: Image.memory(
+                                uint8list,
+                                height: 500,
+                              ),
                             ),
                           ),
+                          // Rotation Controls
+                          if (!isCapturing)
+                            Positioned(
+                              top: 0,
+                              left: MediaQuery.sizeOf(context).width / 3,
+                              right: MediaQuery.sizeOf(context).width / 3,
+                              child: Row(
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.rotate_left),
+                                    onPressed: () {
+                                      setState(() {
+                                        rotationAngle -=
+                                            0.1; // Rotate counter-clockwise
+                                      });
+                                    },
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.rotate_right),
+                                    onPressed: () {
+                                      setState(() {
+                                        rotationAngle +=
+                                            0.1; // Rotate clockwise
+                                      });
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
                         ],
                       ),
                     ),
@@ -288,6 +323,7 @@ class _ShaheenAlertDialogState extends ConsumerState<ShaheenAlertDialog> {
             );
           }
         } catch (err) {
+          if (!context.mounted) return;
           showTopSnackBar(
             Overlay.of(context),
             const CustomSnackBar.error(message: "An Error Occurred"),

@@ -55,40 +55,49 @@ class APIService {
     }
   }
 
-  static Future<bool> sendWhatsappMessage(
-      {required String mobileNo, required String imageUrl}) async {
-    dio.interceptors.add(TrailingSlashInterceptor());
+  static Future<bool> sendWhatsappMessage({
+    required String mobileNo,
+    required String imageUrl,
+  }) async {
+    Dio dio = Dio();
+
+    const String apiUrl =
+        'https://api.ultramsg.com/instance85658/messages/image';
+    const String apiToken = 'z7wtb7rxy88c8lmn';
+
     try {
       final response = await dio.post(
-        Constants.whatsappUrl,
+        apiUrl,
         data: {
-          "countryCode": "+91",
-          "phoneNumber": mobileNo,
-          "type": "Template",
-          "template": {
-            "name": "send_picture",
-            "languageCode": "en",
-            "headerValues": [
-              imageUrl,
-            ]
-          }
+          'token': apiToken,
+          'to': mobileNo, // Include the complete phone number with country code
+          'image': imageUrl, // URL of the image to send
+          'caption': """
+Dear Guest,
+
+Thank you for joining the International Conference on “Muslim Intellectuals’ Vision for 2047” at Shaheen Group of Institutions. We’re excited to share a special photograph of you from the event, commemorating your presence and contribution to this historic occasion.
+
+Warm regards,
+Shaheen Group of Institutions
+          """, // Caption to accompany the image
         },
         options: Options(
           headers: {
-            "Authorization": "Basic ${dotenv.env["INTERAKT_KEY"]}",
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
         ),
       );
-      if (response.statusCode == HttpStatus.created) {
+
+      if (response.statusCode == 200) {
         return true;
       } else {
-        logger.e("Error from sendWhatsappMessage: ", error: response.data);
+        print("Error from sendWhatsappMessage: ${response.data}");
         return false;
       }
     } on DioException catch (err) {
-      logger.e(
-          "Error from catch block in sendWhatsAppMessage: status code: ${err.response!.statusCode} ",
-          error: err.response?.data);
+      print(
+          "Error from catch block in sendWhatsappMessage: ${err.response?.statusCode}");
+      print("Error data: ${err.response?.data}");
       return false;
     }
   }
