@@ -94,20 +94,20 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                 margin: const EdgeInsets.all(10),
                 height: MediaQuery.of(context).size.width,
                 width: MediaQuery.of(context).size.width,
-                // decoration: BoxDecoration(
-                //     border: Border.all(
-                //       color: const Color(0xff002147),
-                //       width: 10,
-                //     ),
-                //     borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                    border: Border.all(
+                      color: const Color(0xff002147),
+                      width: 10,
+                    ),
+                    borderRadius: BorderRadius.circular(10)),
                 child: Column(
                   children: [
-                    // Container(
-                    //   height: MediaQuery.of(context).size.width / 6,
-                    //   color: const Color(0xff002147),
-                    //   width: double.infinity,
-                    //   child: Image.asset("assets/logo.png"),
-                    // ),
+                    Container(
+                      height: MediaQuery.of(context).size.width / 6,
+                      color: const Color(0xff002147),
+                      width: double.infinity,
+                      child: Image.asset("assets/logo.png"),
+                    ),
                     Expanded(
                       child: Stack(
                         children: [
@@ -119,50 +119,50 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                               ),
                             ),
                           ),
-                          // Positioned(
-                          //     bottom: 0,
-                          //     left: 0,
-                          //     right: 0,
-                          //     child: Container(
-                          //       alignment: Alignment.bottomRight,
-                          //       height: MediaQuery.of(context).size.width / 15,
-                          //       color: const Color(0xff002147),
-                          //       child: const Row(
-                          //         children: [
-                          //           Expanded(
-                          //               flex: 3,
-                          //               child: FittedBox(
-                          //                 child: Text(
-                          //                   "Toll Free No: 18001216235",
-                          //                   style: TextStyle(
-                          //                     color: Colors.white,
-                          //                   ),
-                          //                 ),
-                          //               )),
-                          //           SizedBox(
-                          //             width: 20,
-                          //           ),
-                          //           Expanded(
-                          //             flex: 2,
-                          //             child: FittedBox(
-                          //               child: Row(
-                          //                 children: [
-                          //                   Icon(
-                          //                     Icons.public,
-                          //                     color: Colors.white,
-                          //                   ),
-                          //                   Text(
-                          //                     "shaheengroup.org",
-                          //                     style: TextStyle(
-                          //                         color: Colors.white),
-                          //                   ),
-                          //                 ],
-                          //               ),
-                          //             ),
-                          //           ),
-                          //         ],
-                          //       ),
-                          //     )),
+                          Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                alignment: Alignment.bottomRight,
+                                height: MediaQuery.of(context).size.width / 15,
+                                color: const Color(0xff002147),
+                                child: const Row(
+                                  children: [
+                                    Expanded(
+                                        flex: 3,
+                                        child: FittedBox(
+                                          child: Text(
+                                            "Toll Free No: 18001216235",
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        )),
+                                    SizedBox(
+                                      width: 20,
+                                    ),
+                                    Expanded(
+                                      flex: 2,
+                                      child: FittedBox(
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.public,
+                                              color: Colors.white,
+                                            ),
+                                            Text(
+                                              "shaheengroup.org",
+                                              style: TextStyle(
+                                                  color: Colors.white),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )),
                           TransformableBox(
                             visibleHandles: isCapturing
                                 ? {}
