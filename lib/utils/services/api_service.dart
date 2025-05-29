@@ -63,7 +63,7 @@ class APIService {
 
     const String apiUrl =
         'https://api.ultramsg.com/instance85658/messages/image';
-    const String apiToken = 'z7wtb7rxy88c8lmn';
+    final String apiToken = dotenv.env['ULTRAMSG_KEY']!;
 
     try {
       final response = await dio.post(
@@ -75,10 +75,11 @@ class APIService {
           'caption': """
 Dear Guest,
 
-Thank you for joining the International Conference on “Muslim Intellectuals’ Vision for 2047” at Shaheen Group of Institutions. We’re excited to share a special photograph of you from the event, commemorating your presence and contribution to this historic occasion.
+Thank you for visiting Shaheen Group of Institutions. We are pleased to share a special photograph of you, capturing your visit with us.
 
 Warm regards,
 Shaheen Group of Institutions
+
           """, // Caption to accompany the image
         },
         options: Options(

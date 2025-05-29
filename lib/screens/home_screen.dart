@@ -55,7 +55,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     try {
       // Ensure that the camera is initialized.
       await _initializeControllerFuture;
-
+       
       // Attempt to take a picture and then get the location
       // where the image file is saved.
       final image = await _controller.takePicture();
@@ -74,6 +74,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     // Fill this out in the next steps.
     return FutureBuilder(
       future: _initializeControllerFuture,
+      
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           // If the Future is complete, display the preview.
