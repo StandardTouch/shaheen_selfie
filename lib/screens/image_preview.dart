@@ -19,32 +19,32 @@ class ImagePreview extends ConsumerStatefulWidget {
 
 class _ImagePreviewState extends ConsumerState<ImagePreview> {
   void onButtonPress() async {
-    try {
-      setState(
-        () {
-          isLoading = true;
-        },
-      );
-      final image = await makeImageTransparent(widget.imagePath);
-      // final image = await removeGreenShades(widget.imagePath);
+  try {
+    setState(() {
+      isLoading = true;
+    });
 
-      if (!context.mounted) return;
-      context.pushNamed(
-        "transparent",
-        extra: image,
-      );
-    } catch (err) {
-      showTopSnackBar(
-        Overlay.of(context),
-        CustomSnackBar.error(message: "$err"),
-      );
-      logger.e("From image preview screen: $err");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
+    final originalBytes = await File(widget.imagePath).readAsBytes();
+
+    if (!context.mounted) return;
+
+    // Pass raw bytes buffer instead of processed image
+    context.pushNamed(
+      "transparent",
+      extra: originalBytes.buffer,
+    );
+  } catch (err) {
+    showTopSnackBar(
+      Overlay.of(context),
+      CustomSnackBar.error(message: "$err"),
+    );
+    logger.e("From image preview screen: $err");
+  } finally {
+    setState(() {
+      isLoading = false;
+    });
   }
+}
 
   bool isLoading = false;
 
@@ -117,7 +117,7 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
-              child: const Text("Remove background"),
+              child: const Text("Continue"),
             ),
     );
   }

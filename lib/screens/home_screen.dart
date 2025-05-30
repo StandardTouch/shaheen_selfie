@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,9 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:shaheen_selfie/utils/config/logger.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({
-    super.key,
-  });
+  const HomeScreen({super.key});
 
   @override
   HomeScreenState createState() => HomeScreenState();
@@ -20,18 +20,13 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // To display the current output from the Camera,
-    // create a CameraController.
 
     _controller = CameraController(
-      // Get a specific camera from the list of available cameras.
       const CameraDescription(
         lensDirection: CameraLensDirection.back,
         sensorOrientation: 90,
         name: "0",
       ),
-
-      // Define the resolution to use.
       ResolutionPreset.high,
       enableAudio: false,
     );
@@ -39,56 +34,94 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
     _controller.setFlashMode(FlashMode.off);
 
     _initializeControllerFuture = _controller.initialize();
-    // Next, initialize the controller. This returns a Future.
 
     logger.t("initialize controller value: $_initializeControllerFuture");
   }
 
   @override
   void dispose() {
-    // Dispose of the controller when the widget is disposed.
     _controller.dispose();
     super.dispose();
   }
 
-  void takePicture() async {
-    try {
-      // Ensure that the camera is initialized.
-      await _initializeControllerFuture;
-       
-      // Attempt to take a picture and then get the location
-      // where the image file is saved.
-      final image = await _controller.takePicture();
-      if (!context.mounted) return;
-      context.pushNamed("preview", pathParameters: {
-        "imagePath": image.path,
-      });
-    } catch (e) {
-      // If an error occurs, log the error to the console.
-      logger.e(e);
-    }
+ void takePicture() async {
+  try {
+    await _initializeControllerFuture;
+    final image = await _controller.takePicture();
+    if (!context.mounted) return;
+
+    // Read the image bytes
+    final bytes = await File(image.path).readAsBytes();
+
+    // Navigate directly to transparent screen and pass bytes buffer
+    context.pushNamed(
+      "transparent",
+      extra: bytes.buffer,
+    );
+  } catch (e) {
+    logger.e(e);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
-    // Fill this out in the next steps.
     return FutureBuilder(
       future: _initializeControllerFuture,
-      
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          // If the Future is complete, display the preview.
+          final screenSize = MediaQuery.of(context).size;
+
+          // Calculate the area to keep visible for the next screen
+          // Example: Next screen image container takes ~70% height; so black overlay covers remaining 30%
+          // Adjust percentages to match your next screen layout exactly
+
+          const visibleHeightRatio = 0.7; // portion visible for image
+          final visibleHeight = screenSize.height * visibleHeightRatio;
+          final overlayHeight = screenSize.height - visibleHeight;
+
           return Scaffold(
-            backgroundColor: Colors.transparent,
-            body: SizedBox(
-              width: double.infinity,
-              child: CameraPreview(_controller),
+            backgroundColor: Colors.black,
+            body: Stack(
+              children: [
+                CameraPreview(_controller),
+                // Top black overlay
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: overlayHeight / 2,
+                  child: Container(color: Colors.black.withOpacity(0.6)),
+                ),
+                // Bottom black overlay
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: overlayHeight / 2,
+                  child: Container(color: Colors.black.withOpacity(0.6)),
+                ),
+                // Left black overlay (optional if you want side padding)
+                // Positioned(
+                //   top: overlayHeight / 2,
+                //   bottom: overlayHeight / 2,
+                //   left: 0,
+                //   width: 20,
+                //   child: Container(color: Colors.black.withOpacity(0.6)),
+                // ),
+                // Right black overlay (optional)
+                // Positioned(
+                //   top: overlayHeight / 2,
+                //   bottom: overlayHeight / 2,
+                //   right: 0,
+                //   width: 20,
+                //   child: Container(color: Colors.black.withOpacity(0.6)),
+                // ),
+              ],
             ),
-            floatingActionButtonLocation:
-                FloatingActionButtonLocation.centerFloat,
+            floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
             floatingActionButton: FloatingActionButton(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(100)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
               onPressed: takePicture,
               child: Container(
                 width: double.infinity,
@@ -102,26 +135,12 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           );
         } else if (snapshot.hasError) {
-          // Handle any errors that occurred during initialization.
           return Scaffold(
-            body: Center(
-              child: Text('Error: ${snapshot.error}'),
-            ),
-          );
-        } else if (snapshot.connectionState == ConnectionState.waiting) {
-          // Otherwise, display a loading indicator.
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: Text('Error: ${snapshot.error}')),
           );
         } else {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(
-                color: Colors.red,
-              ),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
       },
