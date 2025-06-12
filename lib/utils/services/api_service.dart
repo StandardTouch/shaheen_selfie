@@ -73,13 +73,12 @@ class APIService {
           'to': mobileNo, // Include the complete phone number with country code
           'image': imageUrl, // URL of the image to send
           'caption': """
-Dear Guest,
+Dear parent,
 
-Thank you for visiting Shaheen Group of Institutions. We are pleased to share a special photograph of you, capturing your visit with us.
+Greetings, Your ward has reached shaheen Campus,  We are pleased to share a special photograph of your ward .
 
 Warm regards,
 Shaheen Group of Institutions
-
           """, // Caption to accompany the image
         },
         options: Options(
