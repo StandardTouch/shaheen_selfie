@@ -55,22 +55,23 @@ class BgSelectionScreen extends StatelessWidget {
 
               // Option 2: Remove background
               ElevatedButton(
-                onPressed: () {
-                  // Proceed with background removal
-                  context.go('transparent');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,  // Change button color
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: const Text(
-                  "Remove Background",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
+  onPressed: () {
+    // Proceed to the Home Screen for capturing the image
+    context.go('/home');
+  },
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.red, // Customize button color
+    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(30),
+    ),
+  ),
+  child: const Text(
+    "I don't want to remove the background", // Text for no background removal
+    style: TextStyle(fontSize: 16),
+  ),
+),
+
             ],
           ),
         ),
