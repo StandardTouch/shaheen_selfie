@@ -58,6 +58,7 @@ class APIService {
   static Future<bool> sendWhatsappMessage({
     required String mobileNo,
     required String imageUrl,
+    required String message,
   }) async {
     Dio dio = Dio();
 
@@ -72,15 +73,7 @@ class APIService {
           'token': apiToken,
           'to': mobileNo, // Include the complete phone number with country code
           'image': imageUrl, // URL of the image to send
-          'caption': """
-Dear Guest,
-
-Thank you for visiting Shaheen Group of Institutions. We are pleased to share a special photograph of you, capturing your visit with us.
-
-Warm regards,
-Shaheen Group of Institutions
-
-          """, // Caption to accompany the image
+          'caption': message, // Caption to accompany the image
         },
         options: Options(
           headers: {

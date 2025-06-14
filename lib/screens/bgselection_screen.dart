@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:go_router/go_router.dart';
-
+import 'package:shaheen_selfie/screens/withoutbg/home_screen.dart';
+import 'package:shaheen_selfie/screens/withbg/withbgcamera_screen.dart';
 
 class BgSelectionScreen extends StatelessWidget {
   const BgSelectionScreen({super.key});
@@ -9,69 +9,79 @@ class BgSelectionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Choose Option"),
-        backgroundColor: const Color(0xff002147), // Change as needed
-        centerTitle: true,
+      appBar:AppBar(
+      backgroundColor: const Color(0xff002147),
+      foregroundColor: Colors.white,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Image.asset(
+            "assets/logo.png",
+            fit: BoxFit.contain,
+            width: 100,
+          ),
+          Text(
+            "Powered By StandardTouch",
+            style: Theme.of(context).textTheme.bodySmall!.copyWith(color: Colors.white),
+          )
+        ],
       ),
+      toolbarHeight: 100,
+      centerTitle: true,
+    ),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0), // Add padding for better layout
+          padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // The Question
               const Text(
                 'Would you like to remove the background from your image?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 40),  // Space between question and buttons
+              const SizedBox(height: 40),
 
-              // Option 1: Do not remove background
               ElevatedButton(
                 onPressed: () {
-                  // Proceed without background removal
-                  context.go('/home');
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const WithbgcameraScreen(),)); // No background removal
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,  // Change button color
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  backgroundColor: const Color(0xff002147),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+                    borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 child: const Text(
                   "I don't want to remove the background",
-                  style: TextStyle(fontSize: 16),
+
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
-              const SizedBox(height: 20),  // Space between buttons
 
-              // Option 2: Remove background
+              const SizedBox(height: 20),
+
               ElevatedButton(
-  onPressed: () {
-    // Proceed to the Home Screen for capturing the image
-    context.go('/home');
-  },
-  style: ElevatedButton.styleFrom(
-    backgroundColor: Colors.red, // Customize button color
-    padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(30),
-    ),
-  ),
-  child: const Text(
-    "I don't want to remove the background", // Text for no background removal
-    style: TextStyle(fontSize: 16),
-  ),
-),
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => const HomeScreen(),)); // No background removal
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                                    backgroundColor: const Color(0xff002147),
 
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                ),
+                child: const Text(
+                  "Yes, remove the background",
+                  style: TextStyle(fontSize: 16, color: Colors.white),
+                ),
+              ),
             ],
           ),
         ),
