@@ -18,8 +18,8 @@ class WithbgView extends ConsumerStatefulWidget {
 class _WithbgViewState extends ConsumerState<WithbgView> {
   bool isCapturing = false;
   late ScreenshotController screenshotController;
-  String selectedMessage =
-      DummyMessages.parentMessage; // Default message to "Parent"
+  String selectedMessage = DummyMessages.messages["Parent"]!;
+ // Default message to "Parent"
 
   // final List<String> messageOptions = ["Parent", "Child", "Guest", "Member"];
 

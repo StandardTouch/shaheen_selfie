@@ -1,20 +1,12 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
-import 'package:cloudinary_sdk/cloudinary_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_box_transform/flutter_box_transform.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shaheen_selfie/components/dialog.dart';
-import 'package:shaheen_selfie/utils/config/logger.dart';
 import 'package:shaheen_selfie/utils/messages.dart';
-import 'package:shaheen_selfie/utils/services/api_service.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 final formKey = GlobalKey<FormState>();
 // GlobalKey stackKey = GlobalKey();
@@ -31,8 +23,8 @@ class TransparentView extends ConsumerStatefulWidget {
 class _TransparentViewState extends ConsumerState<TransparentView> {
   bool isCapturing = false;
   late ScreenshotController screenshotController;
-  String selectedMessage =
-      DummyMessages.parentMessage; // Default message to "Parent"
+  String selectedMessage = DummyMessages.messages["Parent"]!;
+ // Default message to "Parent"
 
   late Rect rect;
   double rotationAngle = 0.0; // State variable for rotation angle

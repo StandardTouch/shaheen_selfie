@@ -145,40 +145,30 @@ class _ShaheenAlertDialogState extends State<ShaheenAlertDialog> {
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: DropdownButtonFormField<String>(
-                    value: localSelectedMessage,
-                    
-                    onChanged: (newMessage) {
-                      if (newMessage == null) return;
-                      setState(() {
-                        print(' this is $newMessage $localSelectedMessage');
-                        localSelectedMessage = newMessage;
-                      });
-                      widget.onMessageChanged(newMessage); // Optional sync to parent
-                    },
-                    items: const [
-                      DropdownMenuItem<String>(
-                          value: DummyMessages.parentMessage,
-                          child: Text("Parent")),
-                      DropdownMenuItem<String>(
-                          value: DummyMessages.childMessage,
-                          child: Text("Child")),
-                      DropdownMenuItem<String>(
-                          value: DummyMessages.guestMessage,
-                          child: Text("Guest")),
-                      DropdownMenuItem<String>(
-                          value: DummyMessages.memberMessage,
-                          child: Text("Member")),
-                    ],
-                    decoration: InputDecoration(
-                      labelText: "Select Message",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    isExpanded: true,
-                    menuMaxHeight: 200,
-                  ),
-                ),
+  value: localSelectedMessage,
+  onChanged: (newMessage) {
+    if (newMessage == null) return;
+    setState(() {
+      localSelectedMessage = newMessage;
+    });
+    widget.onMessageChanged(newMessage);
+  },
+  items: DummyMessages.messages.entries.map((entry) {
+    return DropdownMenuItem<String>(
+      value: entry.value,
+      child: Text(entry.key),
+    );
+  }).toList(),
+  decoration: InputDecoration(
+    labelText: "Select Message",
+    border: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(8),
+    ),
+  ),
+  isExpanded: true,
+  menuMaxHeight: 200,
+),
+ ),
                 TextFormField(
                   keyboardType: TextInputType.number,
                   maxLength: 10,
