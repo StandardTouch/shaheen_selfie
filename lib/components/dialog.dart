@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'package:cloudinary_sdk/cloudinary_sdk.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -35,6 +36,10 @@ class _ShaheenAlertDialogState extends State<ShaheenAlertDialog> {
   bool isLoading = false;
   String phoneNumber = "";
   late String localSelectedMessage;
+  final cloudApiKey = dotenv.env["CLOUDINARY_API_KEY"];
+    final cloudApiSecret = dotenv.env["CLOUDINARY_API_SECRET"];
+  final cloudName = dotenv.env["CLOUDINAME"];
+
 
   @override
   void initState() {
@@ -52,9 +57,9 @@ class _ShaheenAlertDialogState extends State<ShaheenAlertDialog> {
 
   void sharePicture() async {
     final cloudinary = Cloudinary.full(
-      apiKey: "581365824184465",
-      apiSecret: "48xWnkK1rABkTo-9cUCOJaI0fs0",
-      cloudName: "djgpfijtr",
+      apiKey: cloudApiKey!,
+      apiSecret: cloudApiSecret!,
+      cloudName: cloudName!,
     );
 
     if (formKey.currentState!.validate()) {
