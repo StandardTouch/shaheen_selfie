@@ -38,9 +38,11 @@ class HomeScreenState extends ConsumerState<HomeScreen> {
       enableAudio: false,
     );
 
-    _controller.setFlashMode(FlashMode.off);
 
-    _initializeControllerFuture = _controller.initialize();
+    _initializeControllerFuture = _controller.initialize().then((_){
+
+    _controller.setFlashMode(FlashMode.off);
+    });
     // Next, initialize the controller. This returns a Future.
 
     logger.t("initialize controller value: $_initializeControllerFuture");

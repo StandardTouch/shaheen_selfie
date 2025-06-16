@@ -31,9 +31,11 @@ class WithbgcameraScreenState extends ConsumerState<WithbgcameraScreen> {
       enableAudio: false,
     );
 
-    _controller.setFlashMode(FlashMode.off);
 
-    _initializeControllerFuture = _controller.initialize();
+    _initializeControllerFuture = _controller.initialize().then((_){
+
+    _controller.setFlashMode(FlashMode.off);
+    });
 
     logger.t("initialize controller value: $_initializeControllerFuture");
   }
