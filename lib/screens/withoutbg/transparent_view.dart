@@ -23,7 +23,7 @@ class TransparentView extends ConsumerStatefulWidget {
 class _TransparentViewState extends ConsumerState<TransparentView> {
   bool isCapturing = false;
   late ScreenshotController screenshotController;
-  String selectedMessage = DummyMessages.messages["Parent"]!;
+  String selectedMessage = DummyMessages.messages["Guest"]!;
  // Default message to "Parent"
 
   late Rect rect;
