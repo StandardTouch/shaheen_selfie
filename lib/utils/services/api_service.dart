@@ -95,4 +95,40 @@ class APIService {
       return false;
     }
   }
+static Future<int?> getTotalMessagesSent() async {
+  const String apiUrl = 'https://api.ultramsg.com/instance85658/messages';
+  final String apiToken = dotenv.env['ULTRAMSG_KEY']!;
+
+  try {
+    final response = await dio.get(apiUrl, queryParameters: {
+      'token': apiToken,
+      'page': 1,
+      'limit': 1,
+      'status': 'all',
+      'sort': 'desc',
+    }, options: Options(
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+    ));
+
+    if (response.statusCode == 200) {
+  final messages = response.data['messages'] as List<dynamic>;
+  if (messages.isNotEmpty) {
+    return messages.first['id']; // ✅ Return latest message ID
+  }
 }
+ else {
+      print("Error from getTotalMessagesSent: ${response.data}");
+      return null;
+    }
+  } on DioException catch (err) {
+    print("Error from getTotalMessagesSent: ${err.response?.statusCode}");
+    print("Error data: ${err.response?.data}");
+    return null;
+  }
+}
+
+
+}
+
