@@ -54,6 +54,7 @@ dependencies:
   cloudinary_public: ^0.23.1
   cloudinary_sdk: ^5.0.0+1
 
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
