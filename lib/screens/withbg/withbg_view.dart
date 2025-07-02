@@ -68,7 +68,7 @@ class _WithbgViewState extends ConsumerState<WithbgView> {
               width: screenWidth,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: Colors.white,
+                  color: const Color.fromARGB(255, 246, 243, 243),
                   width: 10,
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -81,7 +81,7 @@ class _WithbgViewState extends ConsumerState<WithbgView> {
                 children: [
                   Container(
                     height: screenWidth / 6,
-                    color: Colors.white,
+                      color: const Color.fromARGB(255, 246, 243, 243),
                     width: double.infinity,
                     child: Image.asset("assets/bbflogo.png"),
                   ),
