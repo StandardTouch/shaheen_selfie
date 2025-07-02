@@ -68,7 +68,7 @@ class _WithbgViewState extends ConsumerState<WithbgView> {
               width: screenWidth,
               decoration: BoxDecoration(
                 border: Border.all(
-                  color: const Color(0xff002147),
+                  color: Colors.white,
                   width: 10,
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -81,24 +81,24 @@ class _WithbgViewState extends ConsumerState<WithbgView> {
                 children: [
                   Container(
                     height: screenWidth / 6,
-                    color: const Color(0xff002147),
+                    color: Colors.white,
                     width: double.infinity,
-                    child: Image.asset("assets/logo.png"),
+                    child: Image.asset("assets/bbflogo.png"),
                   ),
                   Expanded(child: Container()), // fill remaining space
 
                   // Bottom info without fixed height, no Positioned
                   Container(
                     width: double.infinity,
-                    color: const Color(0xff002147),
+                    color: const Color.fromARGB(255, 246, 243, 243),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: const Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         FittedBox(
                           child: Text(
-                            "Toll Free No: 18001216235",
-                            style: TextStyle(color: Colors.white),
+                            "Toll Free No: 7829753485",
+                            style: TextStyle(color: Color(0xff02a859)),
                           ),
                         ),
                         SizedBox(height: 8),
@@ -107,11 +107,11 @@ class _WithbgViewState extends ConsumerState<WithbgView> {
                             mainAxisSize: MainAxisSize.min,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(Icons.public, color: Colors.white),
+                              Icon(Icons.public, color: Color(0xff02a859)),
                               SizedBox(width: 6),
                               Text(
-                                "shaheengroup.org",
-                                style: TextStyle(color: Colors.white),
+                                "bidarbettermentfoundation.org",
+                                style: TextStyle(color: Color(0xff02a859),),
                               ),
                             ],
                           ),

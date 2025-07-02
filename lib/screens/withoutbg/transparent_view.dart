@@ -93,7 +93,7 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                     border: Border.all(
-                      color: const Color(0xff002147),
+                      color:  const Color.fromARGB(255, 246, 243, 243),
                       width: 10,
                     ),
                     borderRadius: BorderRadius.circular(10)),
@@ -101,9 +101,9 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                   children: [
                     Container(
                       height: MediaQuery.of(context).size.width / 6,
-                      color: const Color(0xff002147),
+                      color: const Color.fromARGB(255, 246, 243, 243),
                       width: double.infinity,
-                      child: Image.asset("assets/logo.png"),
+                      child: Image.asset("assets/bbflogo.png"),
                     ),
                     Expanded(
                       child: Stack(
@@ -123,16 +123,16 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                               child: Container(
                                 alignment: Alignment.bottomRight,
                                 height: MediaQuery.of(context).size.width / 15,
-                                color: const Color(0xff002147),
+                                color: const Color.fromARGB(255, 246, 243, 243),
                                 child: const Row(
                                   children: [
                                     Expanded(
                                         flex: 3,
                                         child: FittedBox(
                                           child: Text(
-                                            "Toll Free No: 18001216235",
+                                            "Toll Free No: 7829753485",
                                             style: TextStyle(
-                                              color: Colors.white,
+                                              color: Color(0xff02a859),
                                             ),
                                           ),
                                         )),
@@ -146,12 +146,12 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                                           children: [
                                             Icon(
                                               Icons.public,
-                                              color: Colors.white,
+                                              color: Color(0xff02a859),
                                             ),
                                             Text(
-                                              "shaheengroup.org",
+                                              "bidarbettermentfoundation.org",
                                               style: TextStyle(
-                                                  color: Colors.white),
+                                                  color: Color(0xff02a859)),
                                             ),
                                           ],
                                         ),
