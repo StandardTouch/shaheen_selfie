@@ -15,14 +15,15 @@ class TransparentView extends ConsumerStatefulWidget {
   final ByteBuffer imageData;
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _TransparentViewState();
+  ConsumerState<ConsumerStatefulWidget> createState() =>
+      _TransparentViewState();
 }
 
 class _TransparentViewState extends ConsumerState<TransparentView> {
   bool isCapturing = false;
   late ScreenshotController screenshotController;
   String selectedMessage = DummyMessages.messages["Guest"]!;
-  
+
   late Rect rect;
   double rotationAngle = 0.0; // State variable for rotation angle
   late Offset center = const Offset(150, 150);
@@ -101,6 +102,48 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                       width: double.infinity,
                       child: Image.asset("assets/bbflogo.png"),
                     ),
+                    // Toll-Free Number and URL Section
+                    Container(
+                      color: const Color.fromARGB(255, 246, 243, 243),
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: FittedBox(
+                              child: Text(
+                                "Contact No: 9448965656",
+                                style: TextStyle(
+                                  color: Color(0xff02a859),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 20),
+                          Expanded(
+                            flex: 2,
+                            child: FittedBox(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.public,
+                                    color: Color(0xff02a859),
+                                  ),
+                                  Text(
+                                    "bidarbettermentfoundation.org",
+                                    style: TextStyle(
+                                        color: Color(0xff02a859)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Image with Transparent Box for cropping/rotation
                     Expanded(
                       child: Stack(
                         children: [
@@ -113,11 +156,8 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                               ),
                             ),
                           ),
-                          // Floating Image with TransformableBox
-                          Positioned(
-                            top: 50, // Adjust top to make sure it stays within bounds
-                            left: 0,
-                            right: 0,
+                          // Transformable Box for cropping/rotation (floating image)
+                          Positioned.fill(
                             child: TransformableBox(
                               visibleHandles: isCapturing
                                   ? {}
@@ -149,52 +189,35 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                               ),
                             ),
                           ),
-                          // Bottom Contact Section
-                          Positioned(
-                            bottom: 0,
-                            left: 0,
-                            right: 0,
-                            child: Container(
-                              alignment: Alignment.bottomRight,
-                              height: MediaQuery.of(context).size.width / 15,
-                              color: const Color.fromARGB(255, 246, 243, 243),
-                              child: const Row(
+                          // Rotation Controls
+                          if (!isCapturing)
+                            Positioned(
+                              top: 20,
+                              left: MediaQuery.sizeOf(context).width / 3,
+                              right: MediaQuery.sizeOf(context).width / 3,
+                              child: Row(
                                 children: [
-                                  Expanded(
-                                    flex:2,
-                                    child: FittedBox(
-                                      child: Text(
-                                        "Contact No: 9448965656",
-                                        style: TextStyle(
-                                          color: Color(0xff02a859),
-                                        ),
-                                      ),
-                                    ),
+                                  IconButton(
+                                    icon: const Icon(Icons.rotate_left),
+                                    onPressed: () {
+                                      setState(() {
+                                        rotationAngle -=
+                                            0.1; // Rotate counter-clockwise
+                                      });
+                                    },
                                   ),
-                                  SizedBox(width: 20),
-                                  Expanded(
-                                    flex: 2,
-                                    child: FittedBox(
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.public,
-                                            color: Color(0xff02a859),
-                                          ),
-                                          Text(
-                                            "bidarbettermentfoundation.org",
-                                            style: TextStyle(
-                                              color: Color(0xff02a859),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
+                                  IconButton(
+                                    icon: const Icon(Icons.rotate_right),
+                                    onPressed: () {
+                                      setState(() {
+                                        rotationAngle +=
+                                            0.1; // Rotate clockwise
+                                      });
+                                    },
                                   ),
                                 ],
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
@@ -217,7 +240,8 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
               builder: (ctx) {
                 return ShaheenAlertDialog(
                   widgetController: screenshotController,
-                  selectedMessage: selectedMessage,
+                  selectedMessage:
+                      selectedMessage, // Pass the selected message to the dialog
                   onMessageChanged: (message) {
                     setState(() {
                       selectedMessage = message!;
