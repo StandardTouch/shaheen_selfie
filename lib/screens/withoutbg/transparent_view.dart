@@ -130,7 +130,7 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                                         flex: 3,
                                         child: FittedBox(
                                           child: Text(
-                                            "Toll Free No: 7829753485",
+                                            "Toll Free No: 9743846312",
                                             style: TextStyle(
                                               color: Color(0xff02a859),
                                             ),
