@@ -5,33 +5,21 @@ class DummyMessages {
 Dear Guest,
 
 Thank you for visiting Shaheen Group of Institutions. We’re pleased to share a special photograph of you, capturing your visit with us.
-
-Warm regards,
-Shaheen Group of Institutions
 """,
     "Child Entry": """
 Dear Parent,
 
 Greetings, Your ward has reached shaheen Campus,  We are pleased to share a special photograph of your ward .
-
-Warm regards,
-Shaheen Group of Institutions
 """,
     "Child Exit": """
 Dear Parent,
 
 Your ward has departed from Shaheen Campus. We are pleased to share a special photograph of your ward's farewell moment.
-
-Warm regards,
-Shaheen Group of Institutions
 """,
 "Urdu Namaz": """
 محترم والدین،
 
-الحمدللہ، آپ کا بچہ مستقل طور پر تحریک سے جڑا ہوا ہے۔ آپ کو دل کی گہرائیوں سے مبارک ہو، اور دعا گو ہیں کہ یہ تحریک آئندہ بھی جاری رہے۔ براہ کرم خود نماز فجر میں شرکت کریں اور اپنے بچوں کو بھی بھیجتے رہیں۔
-
-گرم جوشی کے ساتھ دعا گو ہیں،
-شاہین گروپ آف انسٹی ٹیوشنز
+الحمدللہ آپ کا بچہ مستقل ’’آؤ!نماز پڑھیں‘‘ تحریک سے جڑا رہا۔ آپ کوبہت بہت مبارک ہو۔ یہ تحریک (’’آؤ!نماز پڑھیں‘‘) یکم جولائی سے دوبارہ شروع ہوچکی ہے۔ لہٰذا آپ خود نماز فجر میں حاضر ہوں اور اپنے بچوں کو بھی بھیجتے رہیں اور اس پیغام کو زیادہ سے زیادہ شہریان بیدر تک شیئر کریں!
 """
     
     // Add more below as needed
