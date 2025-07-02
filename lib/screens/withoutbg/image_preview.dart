@@ -29,11 +29,13 @@ class _ImagePreviewState extends ConsumerState<ImagePreview> {
       final image = await makeImageTransparent(widget.imagePath);
       // final image = await removeGreenShades(widget.imagePath);
 // final image = widget.imagePath;
-// final originalBytes = await File(widget.imagePath).readAsBytes();
+// final image = await File(widget.imagePath).readAsBytes(); use for testing
       if (!context.mounted) return;
       context.pushNamed(
         "transparent",
-        extra:image,
+        // extra:image.buffer, use for testing
+                extra:image,
+
       );
     } catch (err) {
       showTopSnackBar(

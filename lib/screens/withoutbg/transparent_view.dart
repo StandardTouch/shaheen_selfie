@@ -9,23 +9,20 @@ import 'package:shaheen_selfie/components/dialog.dart';
 import 'package:shaheen_selfie/utils/messages.dart';
 
 final formKey = GlobalKey<FormState>();
-// GlobalKey stackKey = GlobalKey();
 
 class TransparentView extends ConsumerStatefulWidget {
   const TransparentView({super.key, required this.imageData});
   final ByteBuffer imageData;
 
   @override
-  ConsumerState<ConsumerStatefulWidget> createState() =>
-      _TransparentViewState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _TransparentViewState();
 }
 
 class _TransparentViewState extends ConsumerState<TransparentView> {
   bool isCapturing = false;
   late ScreenshotController screenshotController;
   String selectedMessage = DummyMessages.messages["Guest"]!;
- // Default message to "Parent"
-
+  
   late Rect rect;
   double rotationAngle = 0.0; // State variable for rotation angle
   late Offset center = const Offset(150, 150);
@@ -85,20 +82,19 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
           controller: screenshotController,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // Keep it square or adjust as per your requirement
-
               return Container(
                 margin: const EdgeInsets.all(10),
                 height: MediaQuery.of(context).size.width,
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                     border: Border.all(
-                      color:  const Color.fromARGB(255, 246, 243, 243),
+                      color: const Color.fromARGB(255, 246, 243, 243),
                       width: 10,
                     ),
                     borderRadius: BorderRadius.circular(10)),
                 child: Column(
                   children: [
+                    // Logo Container
                     Container(
                       height: MediaQuery.of(context).size.width / 6,
                       color: const Color.fromARGB(255, 246, 243, 243),
@@ -108,6 +104,7 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                     Expanded(
                       child: Stack(
                         children: [
+                          // Background Image
                           Container(
                             decoration: const BoxDecoration(
                               image: DecorationImage(
@@ -116,110 +113,88 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
                               ),
                             ),
                           ),
+                          // Floating Image with TransformableBox
                           Positioned(
-                              bottom: 0,
-                              left: 0,
-                              right: 0,
-                              child: Container(
-                                alignment: Alignment.bottomRight,
-                                height: MediaQuery.of(context).size.width / 15,
-                                color: const Color.fromARGB(255, 246, 243, 243),
-                                child: const Row(
-                                  children: [
-                                    Expanded(
-                                        flex: 3,
-                                        child: FittedBox(
-                                          child: Text(
-                                            "Contact No: 9448965656",
+                            top: 50, // Adjust top to make sure it stays within bounds
+                            left: 0,
+                            right: 0,
+                            child: TransformableBox(
+                              visibleHandles: isCapturing
+                                  ? {}
+                                  : {
+                                      HandlePosition.left,
+                                      HandlePosition.right,
+                                      HandlePosition.top,
+                                      HandlePosition.bottom,
+                                      HandlePosition.topLeft,
+                                      HandlePosition.bottomRight,
+                                      HandlePosition.topRight,
+                                      HandlePosition.bottomLeft
+                                    },
+                              rect: rect,
+                              clampingRect:
+                                  Offset.zero & MediaQuery.sizeOf(context),
+                              onChanged: (result, event) {
+                                setState(() {
+                                  rect = result.rect;
+                                });
+                              },
+                              // Apply rotation using Transform widget
+                              contentBuilder: (ctx, rect, flip) => Transform.rotate(
+                                angle: rotationAngle, // Apply the rotation
+                                child: Image.memory(
+                                  uint8list,
+                                  height: 500,
+                                ),
+                              ),
+                            ),
+                          ),
+                          // Bottom Contact Section
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              alignment: Alignment.bottomRight,
+                              height: MediaQuery.of(context).size.width / 15,
+                              color: const Color.fromARGB(255, 246, 243, 243),
+                              child: const Row(
+                                children: [
+                                  Expanded(
+                                    flex:2,
+                                    child: FittedBox(
+                                      child: Text(
+                                        "Contact No: 9448965656",
+                                        style: TextStyle(
+                                          color: Color(0xff02a859),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 20),
+                                  Expanded(
+                                    flex: 2,
+                                    child: FittedBox(
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.public,
+                                            color: Color(0xff02a859),
+                                          ),
+                                          Text(
+                                            "bidarbettermentfoundation.org",
                                             style: TextStyle(
                                               color: Color(0xff02a859),
                                             ),
                                           ),
-                                        )),
-                                    SizedBox(
-                                      width: 20,
-                                    ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: FittedBox(
-                                        child: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.public,
-                                              color: Color(0xff02a859),
-                                            ),
-                                            Text(
-                                              "bidarbettermentfoundation.org",
-                                              style: TextStyle(
-                                                  color: Color(0xff02a859)),
-                                            ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ),
-                              )),
-                          TransformableBox(
-                            visibleHandles: isCapturing
-                                ? {}
-                                : {
-                                    HandlePosition.left,
-                                    HandlePosition.right,
-                                    HandlePosition.top,
-                                    HandlePosition.bottom,
-                                    HandlePosition.topLeft,
-                                    HandlePosition.bottomRight,
-                                    HandlePosition.topRight,
-                                    HandlePosition.bottomLeft
-                                  },
-                            rect: rect,
-                            clampingRect:
-                                Offset.zero & MediaQuery.sizeOf(context),
-                            onChanged: (result, event) {
-                              setState(() {
-                                rect = result.rect;
-                              });
-                            },
-                            // Apply rotation using Transform widget
-                            contentBuilder: (ctx, rect, flip) =>
-                                Transform.rotate(
-                              angle: rotationAngle, // Apply the rotation
-                              child: Image.memory(
-                                uint8list,
-                                height: 500,
-                              ),
-                            ),
-                          ),
-                          // Rotation Controls
-                          if (!isCapturing)
-                            Positioned(
-                              top: 0,
-                              left: MediaQuery.sizeOf(context).width / 3,
-                              right: MediaQuery.sizeOf(context).width / 3,
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    icon: Icon(Icons.rotate_left),
-                                    onPressed: () {
-                                      setState(() {
-                                        rotationAngle -=
-                                            0.1; // Rotate counter-clockwise
-                                      });
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.rotate_right),
-                                    onPressed: () {
-                                      setState(() {
-                                        rotationAngle +=
-                                            0.1; // Rotate clockwise
-                                      });
-                                    },
                                   ),
                                 ],
                               ),
                             ),
+                          ),
                         ],
                       ),
                     ),
@@ -242,8 +217,7 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
               builder: (ctx) {
                 return ShaheenAlertDialog(
                   widgetController: screenshotController,
-                  selectedMessage:
-                      selectedMessage, // Pass the selected message to the dialog
+                  selectedMessage: selectedMessage,
                   onMessageChanged: (message) {
                     setState(() {
                       selectedMessage = message!;
