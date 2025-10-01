@@ -202,7 +202,9 @@ class _ShaheenAlertDialogState extends State<ShaheenAlertDialog> {
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed: isLoading ? null : sharePicture,
+            onPressed:() {isLoading ? null : sharePicture;
+            print("sharePicture called");
+            } ,
             child: isLoading
                 ? const CircularProgressIndicator()
                 : const Text("Send Message"),

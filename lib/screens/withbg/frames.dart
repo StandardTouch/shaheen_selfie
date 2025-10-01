@@ -1,119 +1,8 @@
-// withbg_view.dart
+
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:shaheen_selfie/components/dialog.dart';
-import 'package:shaheen_selfie/utils/messages.dart';
-
-final formKey = GlobalKey<FormState>();
-
-enum Brand { shaheen, bbf }
-
-class WithbgView extends ConsumerStatefulWidget {
-  const WithbgView({super.key, required this.imageData});
-  final ByteBuffer imageData;
-
-  @override
-  ConsumerState<ConsumerStatefulWidget> createState() => _WithbgViewState();
-}
-
-class _WithbgViewState extends ConsumerState<WithbgView> {
-  bool isCapturing = false;
-  late ScreenshotController screenshotController;
-  String selectedMessage = DummyMessages.messages["Guest"]!;
-  Brand selectedBrand = Brand.shaheen; // default
-
-  @override
-  void initState() {
-    super.initState();
-    screenshotController = ScreenshotController();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final Uint8List uint8list = Uint8List.view(widget.imageData);
-
-    return Scaffold(
-      extendBody: true,
-      appBar: AppBar(
-        backgroundColor: const Color(0xff002147),
-        foregroundColor: Colors.white,
-        centerTitle: true,
-        toolbarHeight: 88,
-        title: Column(
-          children: [
-            Image.asset("assets/logo.png", width: 92, fit: BoxFit.contain),
-            const SizedBox(height: 4),
-            Text(
-              "Powered By StandardTouch",
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white),
-            ),
-          ],
-        ),
-      ),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            // Compact segmented switch
-            Padding(
-              padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
-              child: _BrandSwitcher(
-                value: selectedBrand,
-                onChanged: (v) => setState(() => selectedBrand = v),
-              ),
-            ),
-
-            // Screenshot area
-            Expanded(
-              child: Center(
-                child: Screenshot(
-                  controller: screenshotController,
-                  child: AspectRatio(
-                    aspectRatio: 4 / 5, // consistent portrait canvas
-                    child: _BrandCard(
-                      brand: selectedBrand,
-                      photoBytes: uint8list,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: ElevatedButton(
-          onPressed: () {
-            setState(() => isCapturing = true);
-            showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (ctx) => ShaheenAlertDialog(
-                widgetController: screenshotController,
-                onMessageChanged: (message) {
-                  setState(() => selectedMessage = message ?? selectedMessage);
-                },
-                selectedMessage: selectedMessage,
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xff002147),
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-          ),
-          child: const Text("Share"),
-        ),
-      ),
-    );
-  }
-}
-
+import 'package:shaheen_selfie/screens/withbg/withbg_view.dart';
 
 class _BrandSwitcher extends StatelessWidget {
   const _BrandSwitcher({required this.value, required this.onChanged});
@@ -207,8 +96,6 @@ class _BrandCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    const double hPad = 12;   
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12),
       elevation: 6,
@@ -247,7 +134,6 @@ class _BrandCard extends StatelessWidget {
           // subtle inner border to separate from screen background
           Positioned.fill(
             child: IgnorePointer(
-              
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.black.withOpacity(0.06), width: 1),
