@@ -36,102 +36,162 @@ class _ShaheenAlertDialogState extends State<ShaheenAlertDialog> {
   bool isLoading = false;
   String phoneNumber = "";
   late String localSelectedMessage;
-  final cloudApiKey = dotenv.env["CLOUDINARY_API_KEY"];
-    final cloudApiSecret = dotenv.env["CLOUDINARY_API_SECRET"];
-  final cloudName = dotenv.env["CLOUDINAME"];
 
+  // NOTE: fixed common env var typo + added logs
+  String? get cloudApiKey   => dotenv.env["CLOUDINARY_API_KEY"];
+  String? get cloudApiSecret=> dotenv.env["CLOUDINARY_API_SECRET"];
+  String? get cloudName     => (dotenv.env["CLOUDINARY_CLOUD_NAME"] ?? dotenv.env["CLOUDINAME"]);
 
   @override
   void initState() {
     super.initState();
     localSelectedMessage = widget.selectedMessage;
+
+    // ---- Debug: env + state ----
+    logger.t("[Dialog:initState] selectedMessage='${widget.selectedMessage}'");
+    logger.t("[Dialog:initState] Env keys present? "
+        "API_KEY=${cloudApiKey?.isNotEmpty == true}, "
+        "API_SECRET=${cloudApiSecret?.isNotEmpty == true}, "
+        "CLOUD_NAME=${cloudName?.isNotEmpty == true}");
   }
 
-  // Method to generate a unique string
   String generateUniqueString() {
     final Random random = Random();
-    String randomString = List.generate(10, (_) => random.nextInt(256).toRadixString(16)).join();
-    String timestamp = DateFormat('yyyyMMddHHmmssSSS').format(DateTime.now());
+    final randomString = List.generate(10, (_) => random.nextInt(256).toRadixString(16)).join();
+    final timestamp = DateFormat('yyyyMMddHHmmssSSS').format(DateTime.now());
     return '$timestamp-$randomString';
   }
 
-  void sharePicture() async {
-    final cloudinary = Cloudinary.full(
-      apiKey: cloudApiKey!,
-      apiSecret: cloudApiSecret!,
-      cloudName: cloudName!,
-    );
+  Future<void> sharePicture() async {
+    final sw = Stopwatch()..start();
+    logger.i("[sharePicture] Started");
 
-    if (formKey.currentState!.validate()) {
-      formKey.currentState!.save();
-      setState(() {
-        isLoading = true;
-      });
+    // Validate env
+    if (cloudApiKey == null || cloudApiSecret == null || cloudName == null) {
+      logger.e("[sharePicture] Missing Cloudinary config. "
+          "API_KEY? ${cloudApiKey != null}, SECRET? ${cloudApiSecret != null}, NAME? ${cloudName != null}");
+      if (!mounted) return;
+      showTopSnackBar(
+        Overlay.of(context),
+        const CustomSnackBar.error(message: "Cloudinary config missing. Check .env keys."),
+      );
+      return;
+    }
 
+    // Validate form
+    final isValid = formKey.currentState?.validate() ?? false;
+    logger.t("[sharePicture] form valid? $isValid");
+    if (!isValid) {
+      return;
+    }
+    formKey.currentState!.save();
+    logger.t("[sharePicture] phoneNumber='$phoneNumber'");
+    logger.t("[sharePicture] message='${localSelectedMessage.replaceAll('\n', '\\n')}'");
+
+    setState(() => isLoading = true);
+
+    try {
+      // Capture
+      logger.t("[sharePicture] Capturing screenshot…");
       final imageBytes = await capturePng();
+      logger.t("[sharePicture] Capture size=${imageBytes.length} bytes");
+
+      // File write
+      logger.t("[sharePicture] Writing temp file…");
       final imageFile = await convertToImageFile(imageBytes);
+      if (imageFile == null) {
+        throw Exception("Image file creation failed");
+      }
+      logger.t("[sharePicture] Temp file at: ${imageFile.path} (size=${await imageFile.length()} bytes)");
 
-      if (imageFile != null) {
-        try {
-          final uploadResponse = await cloudinary.uploadResource(
-            CloudinaryUploadResource(
-              filePath: imageFile.path,
-              fileBytes: imageFile.readAsBytesSync(),
-              resourceType: CloudinaryResourceType.image,
-              folder: "shaheen_students",
-              fileName: generateUniqueString(),
-            ),
-          );
-          final imageUrl = uploadResponse.secureUrl;
+      // Upload
+      logger.t("[sharePicture] Creating Cloudinary client…");
+      final cloudinary = Cloudinary.full(
+        apiKey: cloudApiKey!,
+        apiSecret: cloudApiSecret!,
+        cloudName: cloudName!,
+      );
 
-          print("Sending message: $localSelectedMessage");
+      final uniqueName = generateUniqueString();
+      logger.t("[sharePicture] Uploading to Cloudinary… folder=shaheen_students name=$uniqueName");
+      final uploadSw = Stopwatch()..start();
+      final uploadResponse = await cloudinary.uploadResource(
+        CloudinaryUploadResource(
+          filePath: imageFile.path,
+          // (sync read is ok for small files; async is nicer—use await imageFile.readAsBytes() if you prefer)
+          fileBytes: imageFile.readAsBytesSync(),
+          resourceType: CloudinaryResourceType.image,
+          folder: "shaheen_students",
+          fileName: uniqueName,
+        ),
+      );
+      uploadSw.stop();
+      final imageUrl = uploadResponse.secureUrl;
+      logger.i("[sharePicture] Upload done in ${uploadSw.elapsedMilliseconds} ms, url=$imageUrl");
 
-          final isSent = await APIService.sendWhatsappMessage(
-            mobileNo: phoneNumber,
-            imageUrl: imageUrl!,
-            message: localSelectedMessage,
-          );
-
-          if (!context.mounted) return;
-          showTopSnackBar(
-            Overlay.of(context),
-            isSent
-                ? const CustomSnackBar.success(message: "Message Sent")
-                : const CustomSnackBar.error(message: "An Error Occurred"),
-          );
-        } catch (err) {
-          if (!context.mounted) return;
-          showTopSnackBar(
-            Overlay.of(context),
-            const CustomSnackBar.error(message: "An Error Occurred"),
-          );
-        } finally {
-          setState(() {
-            isLoading = false;
-          });
-        }
+      if (imageUrl == null || imageUrl.isEmpty) {
+        throw Exception("Cloudinary returned empty secureUrl");
       }
 
-      if (!context.mounted) return;
+      // Send WhatsApp
+      logger.t("[sharePicture] Sending WhatsApp via APIService…");
+      final sendSw = Stopwatch()..start();
+      final isSent = await APIService.sendWhatsappMessage(
+        mobileNo: phoneNumber,
+        imageUrl: imageUrl,
+        message: localSelectedMessage,
+      );
+      sendSw.stop();
+      logger.i("[sharePicture] WhatsApp send result=$isSent in ${sendSw.elapsedMilliseconds} ms");
+
+      if (!mounted) return;
+      showTopSnackBar(
+        Overlay.of(context),
+        isSent
+            ? const CustomSnackBar.success(message: "Message Sent")
+            : const CustomSnackBar.error(message: "An Error Occurred while sending"),
+      );
+    } catch (err, st) {
+      logger.e("[sharePicture] FAILED: $err", stackTrace: st);
+      if (!mounted) return;
+      showTopSnackBar(
+        Overlay.of(context),
+        const CustomSnackBar.error(message: "An Error Occurred"),
+      );
+    } finally {
+      sw.stop();
+      logger.i("[sharePicture] Finished in ${sw.elapsedMilliseconds} ms");
+      if (mounted) setState(() => isLoading = false);
+
+      // Navigate home after attempt (your original behavior). If you only want on success,
+      // move these lines inside the success branch above.
+      if (!mounted) return;
       context.pop();
       context.go("/home");
     }
   }
 
   Future<Uint8List> capturePng() async {
+    logger.t("[capturePng] Requesting screenshot from controller…");
     final bytes = await widget.widgetController.capture();
-    return bytes!;
+    if (bytes == null) {
+      logger.e("[capturePng] Controller returned null bytes");
+      throw Exception("Screenshot capture returned null");
+    }
+    logger.t("[capturePng] Bytes captured: ${bytes.length}");
+    return bytes;
   }
 
   Future<File?> convertToImageFile(Uint8List pngBytes) async {
     try {
-      Directory directory = await getApplicationDocumentsDirectory();
-      String path = directory.path;
-      File imgFile = File('$path/your_image.png');
-      await imgFile.writeAsBytes(pngBytes);
-      return imgFile;
-    } catch (e) {
-      logger.e("error from convertToImageFile", error: e);
+      final dir = await getApplicationDocumentsDirectory();
+      final ts = DateTime.now().millisecondsSinceEpoch;
+      final file = File('${dir.path}/shaheen_$ts.png');
+      await file.writeAsBytes(pngBytes, flush: true);
+      logger.t("[convertToImageFile] Wrote file: ${file.path}");
+      return file;
+    } catch (e, st) {
+      logger.e("[convertToImageFile] Exception: $e", stackTrace: st);
       return null;
     }
   }
@@ -139,6 +199,7 @@ class _ShaheenAlertDialogState extends State<ShaheenAlertDialog> {
   @override
   Widget build(BuildContext context) {
     return StatefulBuilder(builder: (context, setState) {
+      logger.t("[Dialog:build] isLoading=$isLoading mounted=$mounted");
       return AlertDialog(
         scrollable: true,
         title: const Text("Enter Parent's Phone Number"),
@@ -147,49 +208,50 @@ class _ShaheenAlertDialogState extends State<ShaheenAlertDialog> {
             key: formKey,
             child: Column(
               children: [
+                // Message dropdown
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: DropdownButtonFormField<String>(
-  value: localSelectedMessage,
-  onChanged: (newMessage) {
-    if (newMessage == null) return;
-    setState(() {
-      localSelectedMessage = newMessage;
-    });
-    widget.onMessageChanged(newMessage);
-  },
-  items: DummyMessages.messages.entries.map((entry) {
-    return DropdownMenuItem<String>(
-      value: entry.value,
-      child: Text(entry.key),
-    );
-  }).toList(),
-  decoration: InputDecoration(
-    labelText: "Select Message",
-    border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
-    ),
-  ),
-  isExpanded: true,
-  menuMaxHeight: 200,
-),
- ),
+                    value: localSelectedMessage,
+                    onChanged: (newMessage) {
+                      logger.t("[Dropdown] onChanged -> ${newMessage?.substring(0, (newMessage.length > 24 ? 24 : newMessage!.length))}...");
+                      if (newMessage == null) return;
+                      setState(() => localSelectedMessage = newMessage);
+                      widget.onMessageChanged(newMessage);
+                    },
+                    items: DummyMessages.messages.entries.map((entry) {
+                      return DropdownMenuItem<String>(
+                        value: entry.value,
+                        child: Text(entry.key),
+                      );
+                    }).toList(),
+                    decoration: InputDecoration(
+                      labelText: "Select Message",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    isExpanded: true,
+                    menuMaxHeight: 200,
+                  ),
+                ),
+
+                // Phone field
                 TextFormField(
                   keyboardType: TextInputType.number,
                   maxLength: 10,
                   decoration: const InputDecoration(
-                      label: Text("Mobile number"), prefixText: "+91"),
+                    label: Text("Mobile number"),
+                    prefixText: "+91",
+                  ),
                   validator: (value) {
-                    if (value == null ||
-                        value.isEmpty ||
-                        value.length != 10 ||
-                        value.trim().length != 10) {
-                      return "Please enter a valid Number";
-                    }
+                    final v = (value ?? "").trim();
+                    final ok = RegExp(r'^[6-9]\d{9}$').hasMatch(v);
+                    logger.t("[Validator] phone='$v' valid=$ok");
+                    if (!ok) return "Please enter a valid Number";
                     return null;
                   },
                   onSaved: (newVal) {
-                    phoneNumber = newVal!;
+                    phoneNumber = (newVal ?? "").trim();
+                    logger.t("[Form:onSaved] phoneNumber='$phoneNumber'");
                   },
                 ),
               ],
@@ -202,9 +264,14 @@ class _ShaheenAlertDialogState extends State<ShaheenAlertDialog> {
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed:() {isLoading ? null : sharePicture;
-            print("sharePicture called");
-            } ,
+            
+            // IMPORTANT: actually call the function
+            onPressed: isLoading ? null : () async {
+              logger.t("[Button] Send Message tapped");
+              await Future.delayed(const Duration(milliseconds: 200)); // let it settle
+
+    await sharePicture(); // <-- call the function
+            },
             child: isLoading
                 ? const CircularProgressIndicator()
                 : const Text("Send Message"),

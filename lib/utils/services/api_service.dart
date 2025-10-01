@@ -83,6 +83,7 @@ class APIService {
       );
 
       if (response.statusCode == 200) {
+        print("Message sent successfully: ${response.data}");
         return true;
       } else {
         print("Error from sendWhatsappMessage: ${response.data}");

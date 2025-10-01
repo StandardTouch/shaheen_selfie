@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shaheen_selfie/components/dialog.dart';
+import 'package:shaheen_selfie/screens/frames.dart';
 import 'package:shaheen_selfie/utils/messages.dart';
 
 final formKey = GlobalKey<FormState>();
@@ -23,241 +24,313 @@ class _TransparentViewState extends ConsumerState<TransparentView> {
   bool isCapturing = false;
   late ScreenshotController screenshotController;
   String selectedMessage = DummyMessages.messages["Guest"]!;
+static const double _kHeaderH = 64.0;
 
+  // brand
+  Brand selectedBrand = Brand.shaheen;
+
+  // transformable image state
   late Rect rect;
-  double rotationAngle = 0.0; // State variable for rotation angle
+  double rotationAngle = 0.0;
   late Offset center = const Offset(150, 150);
-  double width = 100; // Example width, max 80% of parent width
+  double width = 100;
   double height = 100;
 
   String generateUniqueString() {
-    // Create a random number generator
     final Random random = Random();
-    String randomString =
+    final randomString =
         List.generate(10, (_) => random.nextInt(256).toRadixString(16)).join();
-    String timestamp = DateFormat('yyyyMMddHHmmssSSS').format(DateTime.now());
+    final timestamp = DateFormat('yyyyMMddHHmmssSSS').format(DateTime.now());
     return '$timestamp-$randomString';
   }
 
   @override
   void initState() {
-    screenshotController = ScreenshotController();
-    rect = Rect.fromCenter(
-      center: center,
-      width: width,
-      height: height,
-    );
     super.initState();
+    screenshotController = ScreenshotController();
+    rect = Rect.fromCenter(center: center, width: width, height: height);
   }
 
   @override
   Widget build(BuildContext context) {
-    Uint8List uint8list = Uint8List.view(widget.imageData);
+    final Uint8List uint8list = Uint8List.view(widget.imageData);
 
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+      extendBody: true,
       appBar: AppBar(
         backgroundColor: const Color(0xff002147),
         foregroundColor: Colors.white,
+        centerTitle: true,
+        toolbarHeight: 100,
         title: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset(
-              "assets/logo.png",
-              fit: BoxFit.contain,
-              width: 100,
-            ),
+            Image.asset("assets/logo.png", fit: BoxFit.contain, width: 100),
             Text(
               "Powered By StandardTouch",
               style: Theme.of(context)
                   .textTheme
-                  .bodySmall!
-                  .copyWith(color: Colors.white),
-            )
+                  .bodySmall
+                  ?.copyWith(color: Colors.white),
+            ),
           ],
         ),
-        toolbarHeight: 100,
-        centerTitle: true,
       ),
-      body: Center(
-        child: Screenshot(
-          controller: screenshotController,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Container(
-                margin: const EdgeInsets.all(10),
-                height: MediaQuery.of(context).size.width,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                    border: Border.all(
-                      color: const Color.fromARGB(255, 246, 243, 243),
-                      width: 10,
-                    ),
-                    borderRadius: BorderRadius.circular(10)),
-                child: Column(
-                  children: [
-                    // Logo Container
-                    Container(
-                      height: MediaQuery.of(context).size.width / 6,
-                      color: const Color.fromARGB(255, 246, 243, 243),
-                      width: double.infinity,
-                      child: Image.asset("assets/bbflogo.png"),
-                    ),
-                    // Toll-Free Number and URL Section
-                    Container(
-                      color: const Color.fromARGB(255, 246, 243, 243),
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: FittedBox(
-                              child: Text(
-                                "Contact No: 9448965656",
-                                style: TextStyle(
-                                  color: Color(0xff02a859),
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 20),
-                          Expanded(
-                            flex: 2,
-                            child: FittedBox(
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.public,
-                                    color: Color(0xff02a859),
-                                  ),
-                                  Text(
-                                    "bidarbettermentfoundation.org",
-                                    style: TextStyle(
-                                        color: Color(0xff02a859)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    // Image with Transparent Box for cropping/rotation
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          // Background Image
-                          Container(
-                            decoration: const BoxDecoration(
-                              image: DecorationImage(
-                                image: AssetImage("assets/bg.jpg"),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          // Transformable Box for cropping/rotation (floating image)
-                          Positioned.fill(
-                            child: TransformableBox(
-                              visibleHandles: isCapturing
-                                  ? {}
-                                  : {
-                                      HandlePosition.left,
-                                      HandlePosition.right,
-                                      HandlePosition.top,
-                                      HandlePosition.bottom,
-                                      HandlePosition.topLeft,
-                                      HandlePosition.bottomRight,
-                                      HandlePosition.topRight,
-                                      HandlePosition.bottomLeft
-                                    },
-                              rect: rect,
-                              clampingRect:
-                                  Offset.zero & MediaQuery.sizeOf(context),
-                              onChanged: (result, event) {
-                                setState(() {
-                                  rect = result.rect;
-                                });
-                              },
-                              // Apply rotation using Transform widget
-                              contentBuilder: (ctx, rect, flip) => Transform.rotate(
-                                angle: rotationAngle, // Apply the rotation
-                                child: Image.memory(
-                                  uint8list,
-                                  height: 500,
-                                ),
-                              ),
-                            ),
-                          ),
-                          // Rotation Controls
-                          if (!isCapturing)
-                            Positioned(
-                              top: 20,
-                              left: MediaQuery.sizeOf(context).width / 3,
-                              right: MediaQuery.sizeOf(context).width / 3,
-                              child: Row(
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.rotate_left),
-                                    onPressed: () {
-                                      setState(() {
-                                        rotationAngle -=
-                                            0.1; // Rotate counter-clockwise
-                                      });
-                                    },
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.rotate_right),
-                                    onPressed: () {
-                                      setState(() {
-                                        rotationAngle +=
-                                            0.1; // Rotate clockwise
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // brand switcher (same UI as withbg_view)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+              child: BrandSwitcher(
+                value: selectedBrand,
+                onChanged: (v) => setState(() => selectedBrand = v),
+              ),
+            ),
+
+            // screenshot area — uses BrandShell for header/footer and injects the editor Stack in the middle
+            Expanded(
+              child: Center(
+                child: Screenshot(
+                  controller: screenshotController,
+                  child: AspectRatio(
+                    aspectRatio: 4 / 5,
+                    child: BrandShell(
+                      brand: selectedBrand,
+                      // the editable middle content
+                     middle: LayoutBuilder(
+  builder: (context, constraints) {
+    final Size canvasSize = Size(constraints.maxWidth, constraints.maxHeight);
+
+    return Stack(
+      children: [
+        // Background image
+        Positioned.fill(
+          child: Image.asset(
+            'assets/bg.jpg', // or your brand-specific BG
+            fit: BoxFit.cover,
           ),
+        ),
+
+        // Transformable user image on top
+        Positioned.fill(
+          child: TransformableBox(
+            visibleHandles: isCapturing
+                ? {}
+                : {
+                    HandlePosition.left,
+                    HandlePosition.right,
+                    HandlePosition.top,
+                    HandlePosition.bottom,
+                    HandlePosition.topLeft,
+                    HandlePosition.bottomRight,
+                    HandlePosition.topRight,
+                    HandlePosition.bottomLeft,
+                  },
+            rect: rect,
+            clampingRect: Offset.zero & canvasSize,
+            onChanged: (result, event) {
+              setState(() => rect = result.rect);
+            },
+            contentBuilder: (ctx, rect, flip) => Transform.rotate(
+              angle: rotationAngle,
+              child: Image.memory(
+                uint8list,
+                fit: BoxFit.contain,
+              ),
+            ),
+          ),
+        ),
+
+        // rotation controls
+       if (!isCapturing)
+  Positioned(
+    top: _kHeaderH + 12, // <— move below header overlay
+    left: 0,
+    right: 0,
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _RoundIcon(
+          icon: Icons.rotate_left,
+          onTap: () => setState(() => rotationAngle -= 0.1),
+        ),
+        const SizedBox(width: 8),
+        _RoundIcon(
+          icon: Icons.rotate_right,
+          onTap: () => setState(() => rotationAngle += 0.1),
+        ),
+      ],
+    ),
+  ),
+      ],
+    );
+  },
+),
+
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: ElevatedButton(
         onPressed: () {
-          setState(() {
-            isCapturing = true;
-          });
+          setState(() => isCapturing = true);
           showDialog(
-              barrierDismissible: false,
-              context: context,
-              builder: (ctx) {
-                return ShaheenAlertDialog(
-                  widgetController: screenshotController,
-                  selectedMessage:
-                      selectedMessage, // Pass the selected message to the dialog
-                  onMessageChanged: (message) {
-                    setState(() {
-                      selectedMessage = message!;
-                    });
-                  },
-                );
-              });
+            barrierDismissible: false,
+            context: context,
+            builder: (ctx) => ShaheenAlertDialog(
+              widgetController: screenshotController,
+              selectedMessage: selectedMessage,
+              onMessageChanged: (message) =>
+                  setState(() => selectedMessage = message ?? selectedMessage),
+            ),
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xff002147),
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
         ),
         child: const Text("Share"),
+      ),
+    );
+  }
+}
+
+/// Small circular icon button used for rotation controls
+class _RoundIcon extends StatelessWidget {
+  const _RoundIcon({required this.icon, required this.onTap});
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.black.withOpacity(0.5),
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+      ),
+    );
+  }
+}
+
+/// Reusable shell that draws brand header + footer and lets you inject any middle content.
+/// This mirrors the look/feel of BrandCard but keeps the center editable.
+class BrandShell extends StatelessWidget {
+  const BrandShell({
+    super.key,
+    required this.brand,
+    required this.middle,
+    this.rounded = true,
+    this.showInnerBorder = true,
+  });
+
+  final Brand brand;
+  final Widget middle;
+  final bool rounded;
+  final bool showInnerBorder;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = rounded ? 16.0 : 0.0;
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      elevation: 6,
+      shadowColor: Colors.black26,
+      // If you see any faint tint, uncomment the next two lines:
+      // color: Colors.transparent,
+      // surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          // 1) MIDDLE CANVAS FILLS THE ENTIRE CARD
+          Positioned.fill(child: middle),
+
+          // 2) OPTIONAL THIN INNER BORDER
+          if (showInnerBorder)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black.withOpacity(0.06), width: 1),
+                    borderRadius: BorderRadius.circular(radius),
+                  ),
+                ),
+              ),
+            ),
+
+          // 3) HEADER OVERLAY (IGNORED FOR POINTERS SO DRAG WORKS UNDER IT)
+          Align(
+            alignment: Alignment.topCenter,
+            child: IgnorePointer(
+              ignoring: true,
+              child: Container(
+                height: 64,
+                width: double.infinity,
+                color: brand.headerBg.withOpacity(brand == Brand.shaheen ? 1 : 0.96),
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Image.asset(brand.logoAsset, fit: BoxFit.contain, height: 40),
+                ),
+              ),
+            ),
+          ),
+
+          // 4) FOOTER OVERLAY (IGNORED FOR POINTERS SO DRAG WORKS UNDER IT)
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: IgnorePointer(
+              ignoring: true,
+              child: Container(
+                width: double.infinity,
+                color: brand.footerBg.withOpacity(brand == Brand.shaheen ? 1 : 0.96),
+                padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FittedBox(
+                      child: Text(
+                        brand.contact,
+                        style: TextStyle(color: brand.footerFg, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    FittedBox(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.public, color: brand.footerFg, size: 18),
+                          const SizedBox(width: 6),
+                          Text(
+                            brand.domain,
+                            style: TextStyle(color: brand.footerFg, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

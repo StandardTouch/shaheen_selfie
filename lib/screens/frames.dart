@@ -1,11 +1,46 @@
-
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
-import 'package:shaheen_selfie/screens/withbg/withbg_view.dart';
 
-class _BrandSwitcher extends StatelessWidget {
-  const _BrandSwitcher({required this.value, required this.onChanged});
+enum Brand { shaheen, bbf }
+
+extension BrandX on Brand {
+  String get label => this == Brand.shaheen ? "Shaheen" : "BBF";
+
+  // assets
+  String get logoAsset =>
+      this == Brand.shaheen ? "assets/logo.png" : "assets/bbflogo.png";
+
+  // contact & domain
+  String get contact =>
+      this == Brand.shaheen ? "Toll Free No: 18001216235" : "Contact No: 9448965656";
+
+  String get domain =>
+      this == Brand.shaheen ? "shaheengroup.org" : "bidarbettermentfoundation.org";
+
+  // colors
+  Color get primary =>
+      this == Brand.shaheen ? const Color(0xff002147) : const Color(0xff02a859);
+
+  Color get headerBg =>
+      this == Brand.shaheen ? const Color(0xff002147) : const Color(0xffF4F5F7);
+
+  Color get footerBg =>
+      this == Brand.shaheen ? const Color(0xff002147) : const Color(0xffF4F5F7);
+
+  Color get footerFg =>
+      this == Brand.shaheen ? Colors.white : const Color(0xff02a859);
+}
+
+
+
+
+class BrandSwitcher extends StatelessWidget {
+  const BrandSwitcher({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
 
   final Brand value;
   final ValueChanged<Brand> onChanged;
@@ -25,16 +60,18 @@ class _BrandSwitcher extends StatelessWidget {
         children: [
           Expanded(
             child: _Pill(
-              label: "Shaheen",
+              label: Brand.shaheen.label,
               selected: isShaheen,
+              selectedColor: Brand.shaheen.primary, // navy
               onTap: () => onChanged(Brand.shaheen),
             ),
           ),
           const SizedBox(width: 6),
           Expanded(
             child: _Pill(
-              label: "BBF",
+              label: Brand.bbf.label,
               selected: !isShaheen,
+              selectedColor: Brand.shaheen.primary, // keep same UI color
               onTap: () => onChanged(Brand.bbf),
             ),
           ),
@@ -45,14 +82,21 @@ class _BrandSwitcher extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({required this.label, required this.selected, required this.onTap});
+  const _Pill({
+    required this.label,
+    required this.selected,
+    required this.selectedColor,
+    required this.onTap,
+  });
+
   final String label;
   final bool selected;
+  final Color selectedColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected ? const Color(0xff002147) : Colors.transparent;
+    final bg = selected ? selectedColor : Colors.transparent;
     final fg = selected ? Colors.white : Colors.black87;
 
     return InkWell(
@@ -72,111 +116,85 @@ class _Pill extends StatelessWidget {
 }
 
 
-class _BrandCard extends StatelessWidget {
-  const _BrandCard({required this.brand, required this.photoBytes});
+
+
+class BrandCard extends StatelessWidget {
+  const BrandCard({
+    super.key,
+    required this.brand,
+    required this.photoBytes,
+  });
 
   final Brand brand;
   final Uint8List photoBytes;
 
-  // palette
-  Color get _primary =>
-      brand == Brand.shaheen ? const Color(0xff002147) : const Color(0xff02a859);
-  Color get _headerBg =>
-      brand == Brand.shaheen ? const Color(0xff002147) : const Color(0xffF4F5F7);
-  Color get _footerBg =>
-      brand == Brand.shaheen ? const Color(0xff002147) : const Color(0xffF4F5F7);
-  Color get _footerFg =>
-      brand == Brand.shaheen ? Colors.white : const Color(0xff02a859);
-  String get _domain =>
-      brand == Brand.shaheen ? "shaheengroup.org" : "bidarbettermentfoundation.org";
-  String get _contact =>
-      brand == Brand.shaheen ? "Toll Free No: 18001216235" : "Contact No: 9448965656";
-  String get _logoAsset =>
-      brand == Brand.shaheen ? "assets/logo.png" : "assets/bbflogo.png";
-
   @override
   Widget build(BuildContext context) {
+    const radius = 16.0;
+
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12),
       elevation: 6,
       shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
           // background photo
-          Positioned.fill(
-            child: Image.memory(photoBytes, fit: BoxFit.cover),
-          ),
+          Positioned.fill(child: Image.memory(photoBytes, fit: BoxFit.cover)),
 
-          // top header bar (solid for Shaheen, light for BBF)
+          // header
           Align(
             alignment: Alignment.topCenter,
             child: Container(
               height: 64,
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: _headerBg.withOpacity(brand == Brand.shaheen ? 1 : 0.96),
-              ),
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Image.asset(
-                    _logoAsset,
-                    fit: BoxFit.contain,
-                    height: 40,
-                  ),
-                ),
+              color: brand.headerBg.withOpacity(brand == Brand.shaheen ? 1 : 0.96),
+              alignment: Alignment.center,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Image.asset(brand.logoAsset, fit: BoxFit.contain, height: 40),
               ),
             ),
           ),
 
-          // subtle inner border to separate from screen background
+          // thin inner border
           Positioned.fill(
             child: IgnorePointer(
               child: Container(
                 decoration: BoxDecoration(
                   border: Border.all(color: Colors.black.withOpacity(0.06), width: 1),
-                  borderRadius: BorderRadius.circular(16),
+                  borderRadius: BorderRadius.circular(radius),
                 ),
               ),
             ),
           ),
 
-          // bottom footer info
+          // footer
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(
               width: double.infinity,
-              decoration: BoxDecoration(
-                color: _footerBg.withOpacity(brand == Brand.shaheen ? 1 : 0.96),
-              ),
+              color: brand.footerBg.withOpacity(brand == Brand.shaheen ? 1 : 0.96),
               padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   FittedBox(
                     child: Text(
-                      _contact,
-                      style: TextStyle(
-                        color: _footerFg,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.2,
-                      ),
+                      brand.contact,
+                      style: TextStyle(color: brand.footerFg, fontWeight: FontWeight.w600),
                     ),
                   ),
                   const SizedBox(height: 6),
                   FittedBox(
                     child: Row(
                       children: [
-                        Icon(Icons.public, color: _footerFg, size: 18),
+                        Icon(Icons.public, color: brand.footerFg, size: 18),
                         const SizedBox(width: 6),
                         Text(
-                          _domain,
-                          style: TextStyle(
-                            color: _footerFg,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          brand.domain,
+                          style: TextStyle(color: brand.footerFg, fontWeight: FontWeight.w500),
                         ),
                       ],
                     ),
@@ -185,8 +203,6 @@ class _BrandCard extends StatelessWidget {
               ),
             ),
           ),
-
-          // rounded corner mask already handled by Card.clipBehavior
         ],
       ),
     );
